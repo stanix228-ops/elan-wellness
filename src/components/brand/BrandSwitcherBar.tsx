@@ -138,7 +138,7 @@ export const BrandSwitcherBar: React.FC = () => {
         </div>
 
         {/* Кнопки пресетов */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2 max-h-56 overflow-y-auto pr-0.5">
           {BRAND_PRESETS_LIST.map((preset) => {
             const isActive = preset.id === currentPresetId;
             return (

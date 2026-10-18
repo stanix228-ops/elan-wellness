@@ -23,6 +23,7 @@ import {
   Shield,
   Sparkles,
   Trash2,
+  Upload,
   User,
   Users,
   X,
@@ -45,15 +46,19 @@ import {
   formatRussianPhoneInput,
   generateDemoReferenceCode,
   getAdminAuthStatus,
+  getAdminPin,
   getSessionDemoBookings,
   getTelegramSettings,
   getWhatsAppConfirmationUrl,
+  resetAdminPin,
   saveSessionDemoBooking,
   saveTelegramSettings,
   sendTelegramNotification,
   setAdminAuthStatus,
+  setAdminPin,
   toLocalIsoDate,
   updateBookingStatus,
+  verifyAdminPin,
   type BookingStatus,
   type DemoBookingRecord,
   type TelegramSettings,
@@ -62,6 +67,7 @@ import {
   useStudioCatalog,
   PRESET_SERVICE_IMAGES,
   PRESET_SPECIALIST_IMAGES,
+  compressAndReadFileAsDataUrl,
   type WellnessService,
   type SpecialistProfile,
 } from '@/lib/catalogStore';
@@ -168,6 +174,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [serviceFeedback, setServiceFeedback] = React.useState<string | null>(
     null
   );
+  const [isCompressingServiceImage, setIsCompressingServiceImage] =
+    React.useState(false);
+  const serviceFileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   // Состояния редактирования МАСТЕРОВ
   const [editingSpecialist, setEditingSpecialist] =
@@ -176,6 +185,16 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [specialistFeedback, setSpecialistFeedback] = React.useState<
     string | null
   >(null);
+  const [isCompressingSpecialistImage, setIsCompressingSpecialistImage] =
+    React.useState(false);
+  const specialistFileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  // Смена PIN-кода администратора
+  const [currentPinInput, setCurrentPinInput] = React.useState('');
+  const [newPinInput, setNewPinInput] = React.useState('');
+  const [confirmPinInput, setConfirmPinInput] = React.useState('');
+  const [pinChangeSuccess, setPinChangeSuccess] = React.useState<string | null>(null);
+  const [pinChangeError, setPinChangeError] = React.useState<string | null>(null);
 
   // Перезагрузка списка при открытии
   React.useEffect(() => {
@@ -186,19 +205,21 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       setManualSuccessMsg(null);
       setServiceFeedback(null);
       setSpecialistFeedback(null);
+      setPinChangeSuccess(null);
+      setPinChangeError(null);
       setIsAuthenticated(getAdminAuthStatus());
     }
   }, [open]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (pinInput.trim() === DEFAULT_ADMIN_PIN) {
+    if (verifyAdminPin(pinInput)) {
       setIsAuthenticated(true);
       setAdminAuthStatus(true);
       setPinError(null);
       setPinInput('');
     } else {
-      setPinError('Неверный PIN-код. Для демонстрации используйте 1234');
+      setPinError('Неверный PIN-код. Проверьте правильность ввода.');
     }
   };
 
@@ -206,6 +227,92 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     setIsAuthenticated(false);
     setAdminAuthStatus(false);
     setPinInput('');
+  };
+
+  const handleServiceImageFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setIsCompressingServiceImage(true);
+      const dataUrl = await compressAndReadFileAsDataUrl(file, 1200, 1200, 0.82);
+      if (editingService) {
+        setEditingService({
+          ...editingService,
+          image: dataUrl,
+        });
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Ошибка при загрузке фото');
+    } finally {
+      setIsCompressingServiceImage(false);
+      if (e.target) e.target.value = '';
+    }
+  };
+
+  const handleSpecialistImageFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setIsCompressingSpecialistImage(true);
+      const dataUrl = await compressAndReadFileAsDataUrl(file, 800, 800, 0.85);
+      if (editingSpecialist) {
+        setEditingSpecialist({
+          ...editingSpecialist,
+          image: dataUrl,
+        });
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Ошибка при загрузке фото');
+    } finally {
+      setIsCompressingSpecialistImage(false);
+      if (e.target) e.target.value = '';
+    }
+  };
+
+  const handleChangePin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPinChangeSuccess(null);
+    setPinChangeError(null);
+
+    if (!verifyAdminPin(currentPinInput)) {
+      setPinChangeError('Текущий PIN-код указан неверно.');
+      return;
+    }
+    if (newPinInput.length < 4 || newPinInput.length > 8) {
+      setPinChangeError('Новый PIN-код должен содержать от 4 до 8 символов.');
+      return;
+    }
+    if (newPinInput !== confirmPinInput) {
+      setPinChangeError('Новый PIN-код и подтверждение не совпадают.');
+      return;
+    }
+
+    setAdminPin(newPinInput);
+    setCurrentPinInput('');
+    setNewPinInput('');
+    setConfirmPinInput('');
+    setPinChangeSuccess(
+      `PIN-код успешно изменён на ${newPinInput}! Запомните его для следующих входов.`
+    );
+  };
+
+  const handleResetPin = () => {
+    if (
+      window.confirm(
+        `Сбросить PIN-код до заводского по умолчанию (${DEFAULT_ADMIN_PIN})?`
+      )
+    ) {
+      resetAdminPin();
+      setCurrentPinInput('');
+      setNewPinInput('');
+      setConfirmPinInput('');
+      setPinChangeSuccess(`PIN-код сброшен до стандартного: ${DEFAULT_ADMIN_PIN}`);
+      setPinChangeError(null);
+    }
   };
 
   const handleStatusChange = (
@@ -667,15 +774,15 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                 </div>
               )}
 
-              {/* Демо-подсказка по спецификации */}
+              {/* Подсказка PIN */}
               <div className="rounded-xl border border-[#C6B99F]/70 bg-[#F7F4ED] p-3 text-xs text-[#5E5E53] flex items-center justify-between">
-                <span>Демо-PIN для входа:</span>
+                <span>Текущий PIN:</span>
                 <button
                   type="button"
-                  onClick={() => setPinInput('1234')}
+                  onClick={() => setPinInput(getAdminPin())}
                   className="font-mono font-bold text-[#667052] underline cursor-pointer hover:text-[#4F5B3E]"
                 >
-                  1234 (нажмите, чтобы подставить)
+                  {getAdminPin()} (нажмите, чтобы подставить)
                 </button>
               </div>
 
@@ -813,8 +920,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       : 'text-[#5E5E53] hover:bg-[#F7F4ED]'
                   )}
                 >
-                  <RefreshCw className="h-3.5 w-3.5" />
-                  <span>Экспорт</span>
+                  <KeyRound className="h-3.5 w-3.5" />
+                  <span>Настройки и PIN</span>
                 </button>
               </div>
             </div>
@@ -1338,52 +1445,105 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         />
                       </div>
 
-                      {/* ВЫБОР ФОТОГРАФИИ ДЛЯ УСЛУГИ */}
-                      <div className="space-y-2 pt-1 border-t border-[#E5E0D5] text-xs">
-                        <label className="font-semibold text-[#292A23]">
-                          Фотография процедуры (выберите готовый пресет студии или укажите URL)
-                        </label>
-                        <Input
-                          placeholder="https://images.unsplash.com/..."
-                          value={editingService.image}
-                          onChange={(e) =>
-                            setEditingService({
-                              ...editingService,
-                              image: e.target.value,
-                            })
-                          }
-                          className="h-10 text-xs font-mono"
-                        />
+                      {/* ВЫБОР ФОТОГРАФИИ ДЛЯ УСЛУГИ БЕЗ URL-ПОЛЕЙ */}
+                      <div className="space-y-3 pt-2 border-t border-[#E5E0D5] text-xs">
+                        <div className="flex items-center justify-between">
+                          <label className="font-semibold text-[#292A23] flex items-center gap-1.5">
+                            <ImageIcon className="h-4 w-4 text-[#667052]" />
+                            <span>Фотография процедуры</span>
+                          </label>
+                          <span className="text-[11px] text-[#77776B]">
+                            Загрузка с телефона или компьютера
+                          </span>
+                        </div>
 
-                        {/* Быстрые пресеты фото */}
-                        <div className="flex flex-wrap items-center gap-2 pt-1">
-                          <span className="text-[11px] text-[#77776B]">Пресеты студии:</span>
-                          {PRESET_SERVICE_IMAGES.map((preset, idx) => (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={() =>
-                                setEditingService({
-                                  ...editingService,
-                                  image: preset.url,
-                                })
-                              }
-                              className={cn(
-                                'h-9 px-2.5 rounded-lg border text-[11px] transition-all flex items-center gap-1.5 cursor-pointer',
-                                editingService.image === preset.url
-                                  ? 'border-[#667052] bg-[#667052]/10 font-medium text-[#4F5B3E]'
-                                  : 'border-[#E5E0D5] bg-[#FFFCF6] text-[#5E5E53] hover:border-[#C6B99F]'
-                              )}
-                              title={preset.label}
-                            >
+                        {/* Превью текущей фотографии и кнопка загрузки файла */}
+                        <div className="flex flex-col sm:flex-row items-center gap-4 p-3.5 rounded-2xl border border-[#E5E0D5] bg-[#F7F4ED]/50">
+                          <div className="relative shrink-0 overflow-hidden rounded-xl border border-[#E5E0D5] bg-black/5 shadow-inner w-full sm:w-44 h-32 flex items-center justify-center">
+                            {editingService.image ? (
                               <img
-                                src={preset.url}
-                                alt="Пресет"
-                                className="h-5 w-5 rounded object-cover"
+                                src={editingService.image}
+                                alt="Превью услуги"
+                                className="w-full h-full object-cover"
                               />
-                              <span>Вариант {idx + 1}</span>
-                            </button>
-                          ))}
+                            ) : (
+                              <div className="text-center p-3 text-[#77776B]">
+                                <ImageIcon className="h-8 w-8 mx-auto mb-1 opacity-40" />
+                                <span>Фото не выбрано</span>
+                              </div>
+                            )}
+                            {isCompressingServiceImage && (
+                              <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-xs font-medium">
+                                Обработка фото...
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex-1 space-y-2 text-center sm:text-left w-full">
+                            <input
+                              ref={serviceFileInputRef}
+                              type="file"
+                              accept="image/*"
+                              onChange={handleServiceImageFileChange}
+                              className="hidden"
+                            />
+                            <Button
+                              type="button"
+                              onClick={() => serviceFileInputRef.current?.click()}
+                              disabled={isCompressingServiceImage}
+                              className="w-full sm:w-auto h-10 bg-[#667052] hover:bg-[#4F5B3E] text-[#FFFCF6] text-xs font-semibold gap-2 shadow-xs cursor-pointer"
+                            >
+                              <Upload className="h-4 w-4" />
+                              <span>{isCompressingServiceImage ? 'Загрузка...' : 'Выбрать фото с устройства'}</span>
+                            </Button>
+                            <p className="text-[11px] text-[#77776B] leading-relaxed">
+                              Выберите файл из галереи телефона или файлов компьютера (JPG, PNG, WebP). Фото автоматически сжимается для мгновенной загрузки сайта.
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Быстрые пресеты фото из коллекции студии */}
+                        <div className="space-y-1.5 pt-1">
+                          <span className="text-[11px] font-medium text-[#77776B]">
+                            Или выберите готовое фото из коллекции студии:
+                          </span>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            {PRESET_SERVICE_IMAGES.map((preset, idx) => {
+                              const isSelected = editingService.image === preset.url;
+                              return (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  onClick={() =>
+                                    setEditingService({
+                                      ...editingService,
+                                      image: preset.url,
+                                    })
+                                  }
+                                  className={cn(
+                                    'group relative rounded-xl border p-1.5 transition-all text-left flex items-center gap-2 cursor-pointer',
+                                    isSelected
+                                      ? 'border-[#667052] bg-[#667052]/10 ring-1 ring-[#667052]'
+                                      : 'border-[#E5E0D5] bg-[#FFFCF6] hover:border-[#C6B99F]'
+                                  )}
+                                >
+                                  <img
+                                    src={preset.url}
+                                    alt="Пресет"
+                                    className="h-10 w-10 rounded-lg object-cover shrink-0"
+                                  />
+                                  <div className="min-w-0">
+                                    <p className="text-[11px] font-semibold text-[#292A23] truncate">
+                                      Образец {idx + 1}
+                                    </p>
+                                    <p className="text-[10px] text-[#77776B] truncate">
+                                      {preset.label.split('(')[0]}
+                                    </p>
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
                       </div>
 
@@ -1689,52 +1849,105 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         </div>
                       </div>
 
-                      {/* ВЫБОР ФОТОГРАФИИ МАСТЕРА */}
-                      <div className="space-y-2 pt-1 border-t border-[#E5E0D5] text-xs">
-                        <label className="font-semibold text-[#292A23]">
-                          Портрет мастера (выберите готовый пресет или укажите URL)
-                        </label>
-                        <Input
-                          placeholder="https://images.unsplash.com/..."
-                          value={editingSpecialist.image}
-                          onChange={(e) =>
-                            setEditingSpecialist({
-                              ...editingSpecialist,
-                              image: e.target.value,
-                            })
-                          }
-                          className="h-10 text-xs font-mono"
-                        />
+                      {/* ВЫБОР ФОТОГРАФИИ МАСТЕРА БЕЗ URL-ПОЛЕЙ */}
+                      <div className="space-y-3 pt-2 border-t border-[#E5E0D5] text-xs">
+                        <div className="flex items-center justify-between">
+                          <label className="font-semibold text-[#292A23] flex items-center gap-1.5">
+                            <ImageIcon className="h-4 w-4 text-[#667052]" />
+                            <span>Портрет мастера</span>
+                          </label>
+                          <span className="text-[11px] text-[#77776B]">
+                            Загрузка с телефона или компьютера
+                          </span>
+                        </div>
 
-                        {/* Быстрые пресеты фото */}
-                        <div className="flex flex-wrap items-center gap-2 pt-1">
-                          <span className="text-[11px] text-[#77776B]">Пресеты студии:</span>
-                          {PRESET_SPECIALIST_IMAGES.map((preset, idx) => (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={() =>
-                                setEditingSpecialist({
-                                  ...editingSpecialist,
-                                  image: preset.url,
-                                })
-                              }
-                              className={cn(
-                                'h-9 px-2.5 rounded-lg border text-[11px] transition-all flex items-center gap-1.5 cursor-pointer',
-                                editingSpecialist.image === preset.url
-                                  ? 'border-[#667052] bg-[#667052]/10 font-medium text-[#4F5B3E]'
-                                  : 'border-[#E5E0D5] bg-[#FFFCF6] text-[#5E5E53] hover:border-[#C6B99F]'
-                              )}
-                              title={preset.label}
-                            >
+                        {/* Превью фотографии мастера и кнопка выбора файла */}
+                        <div className="flex flex-col sm:flex-row items-center gap-4 p-3.5 rounded-2xl border border-[#E5E0D5] bg-[#F7F4ED]/50">
+                          <div className="relative shrink-0 overflow-hidden rounded-2xl border border-[#E5E0D5] bg-black/5 shadow-inner h-28 w-28 flex items-center justify-center">
+                            {editingSpecialist.image ? (
                               <img
-                                src={preset.url}
-                                alt="Пресет"
-                                className="h-5 w-5 rounded-full object-cover"
+                                src={editingSpecialist.image}
+                                alt="Портрет мастера"
+                                className="w-full h-full object-cover"
                               />
-                              <span>Мастер {idx + 1}</span>
-                            </button>
-                          ))}
+                            ) : (
+                              <div className="text-center p-2 text-[#77776B]">
+                                <User className="h-8 w-8 mx-auto mb-1 opacity-40" />
+                                <span>Нет фото</span>
+                              </div>
+                            )}
+                            {isCompressingSpecialistImage && (
+                              <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-xs font-medium">
+                                Сжатие...
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex-1 space-y-2 text-center sm:text-left w-full">
+                            <input
+                              ref={specialistFileInputRef}
+                              type="file"
+                              accept="image/*"
+                              onChange={handleSpecialistImageFileChange}
+                              className="hidden"
+                            />
+                            <Button
+                              type="button"
+                              onClick={() => specialistFileInputRef.current?.click()}
+                              disabled={isCompressingSpecialistImage}
+                              className="w-full sm:w-auto h-10 bg-[#667052] hover:bg-[#4F5B3E] text-[#FFFCF6] text-xs font-semibold gap-2 shadow-xs cursor-pointer"
+                            >
+                              <Upload className="h-4 w-4" />
+                              <span>{isCompressingSpecialistImage ? 'Загрузка...' : 'Выбрать портрет с устройства'}</span>
+                            </Button>
+                            <p className="text-[11px] text-[#77776B] leading-relaxed">
+                              Загрузите фото мастера прямо со смартфона или компьютера. Система автоматически оптимизирует размер кадра.
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Быстрые пресеты портретов */}
+                        <div className="space-y-1.5 pt-1">
+                          <span className="text-[11px] font-medium text-[#77776B]">
+                            Или выберите готовый портрет из каталога:
+                          </span>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {PRESET_SPECIALIST_IMAGES.map((preset, idx) => {
+                              const isSelected = editingSpecialist.image === preset.url;
+                              return (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  onClick={() =>
+                                    setEditingSpecialist({
+                                      ...editingSpecialist,
+                                      image: preset.url,
+                                    })
+                                  }
+                                  className={cn(
+                                    'group relative rounded-xl border p-1.5 transition-all text-left flex items-center gap-2 cursor-pointer',
+                                    isSelected
+                                      ? 'border-[#667052] bg-[#667052]/10 ring-1 ring-[#667052]'
+                                      : 'border-[#E5E0D5] bg-[#FFFCF6] hover:border-[#C6B99F]'
+                                  )}
+                                >
+                                  <img
+                                    src={preset.url}
+                                    alt="Пресет"
+                                    className="h-10 w-10 rounded-full object-cover shrink-0"
+                                  />
+                                  <div className="min-w-0">
+                                    <p className="text-[11px] font-semibold text-[#292A23] truncate">
+                                      Портрет {idx + 1}
+                                    </p>
+                                    <p className="text-[10px] text-[#77776B] truncate">
+                                      {preset.label.split('(')[0]}
+                                    </p>
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
                       </div>
 
@@ -2115,9 +2328,119 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                 </div>
               )}
 
-              {/* ================= ВКЛАДКА 6: НАСТРОЙКИ И ДАННЫЕ ================= */}
+              {/* ================= ВКЛАДКА 6: НАСТРОЙКИ, БЕЗОПАСНОСТЬ И ДАННЫЕ ================= */}
               {activeTab === 'settings' && (
                 <div className="space-y-5 max-w-xl">
+                  {/* СМЕНА PIN-КОДА АДМИНИСТРАТОРА */}
+                  <div className="rounded-2xl border-2 border-[#667052]/40 bg-[#FFFCF6] p-5 space-y-4 shadow-xs">
+                    <div className="flex items-center justify-between border-b border-[#E5E0D5] pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#667052]/15 text-[#667052]">
+                          <Lock className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="font-serif text-lg font-medium text-[#292A23]">
+                            Безопасность и смена PIN-кода
+                          </p>
+                          <p className="text-xs text-[#77776B]">
+                            Установите свой персональный PIN для входа в панель управления
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="hidden sm:block text-right">
+                        <span className="text-[10px] uppercase tracking-wider text-[#77776B]">
+                          Текущий PIN:
+                        </span>
+                        <p className="font-mono font-bold text-sm text-[#667052]">
+                          {getAdminPin()}
+                        </p>
+                      </div>
+                    </div>
+
+                    {pinChangeSuccess && (
+                      <div className="p-3 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-medium flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+                        <span>{pinChangeSuccess}</span>
+                      </div>
+                    )}
+
+                    {pinChangeError && (
+                      <div className="p-3 rounded-xl border border-[#B44C3E]/30 bg-[#B44C3E]/10 text-[#8C3327] text-xs font-medium flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 shrink-0 text-[#B44C3E]" />
+                        <span>{pinChangeError}</span>
+                      </div>
+                    )}
+
+                    <form onSubmit={handleChangePin} className="space-y-3 text-xs">
+                      <div className="space-y-1">
+                        <label className="font-semibold text-[#292A23]">
+                          Текущий PIN-код *
+                        </label>
+                        <Input
+                          type="password"
+                          maxLength={8}
+                          placeholder="Введите действующий PIN"
+                          value={currentPinInput}
+                          onChange={(e) => setCurrentPinInput(e.target.value)}
+                          className="h-10 text-xs font-mono"
+                          required
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <label className="font-semibold text-[#292A23]">
+                            Новый PIN-код (4–8 знаков) *
+                          </label>
+                          <Input
+                            type="password"
+                            maxLength={8}
+                            placeholder="Например: 5678"
+                            value={newPinInput}
+                            onChange={(e) => setNewPinInput(e.target.value)}
+                            className="h-10 text-xs font-mono"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="font-semibold text-[#292A23]">
+                            Повторите новый PIN-код *
+                          </label>
+                          <Input
+                            type="password"
+                            maxLength={8}
+                            placeholder="Повторите ввод"
+                            value={confirmPinInput}
+                            onChange={(e) => setConfirmPinInput(e.target.value)}
+                            className="h-10 text-xs font-mono"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#E5E0D5]">
+                        <Button
+                          type="submit"
+                          className="bg-[#667052] hover:bg-[#4F5B3E] text-[#FFFCF6] text-xs font-semibold px-5 h-10 cursor-pointer"
+                        >
+                          Сохранить новый PIN
+                        </Button>
+
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleResetPin}
+                          className="text-xs text-[#77776B] hover:text-[#B44C3E] cursor-pointer"
+                        >
+                          Сбросить на 1234
+                        </Button>
+                      </div>
+                    </form>
+                  </div>
+
                   <div className="rounded-2xl border border-[#E5E0D5] bg-[#FFFCF6] p-5 space-y-3">
                     <p className="font-serif text-lg font-medium text-[#292A23]">
                       Экспорт и резервное копирование

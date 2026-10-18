@@ -61,6 +61,7 @@ const BOOKINGS_STORAGE_KEY_V1 = 'elan_wellness_demo_bookings_v1';
 const CERTIFICATES_STORAGE_KEY = 'elan_wellness_demo_certificates_v1';
 const TELEGRAM_SETTINGS_KEY = 'elan_wellness_telegram_settings_v1';
 const ADMIN_AUTH_KEY = 'elan_wellness_admin_auth_v1';
+const ADMIN_PIN_KEY = 'elan_wellness_admin_pin_v1';
 
 /**
  * Возвращает локальную дату в формате YYYY-MM-DD без смещения часового пояса
@@ -502,9 +503,41 @@ export function getWhatsAppConfirmationUrl(booking: DemoBookingRecord): string {
 }
 
 /**
- * Авторизация в кабинете администратора (простой и удобный PIN-код, по умолчанию 1234)
+ * Авторизация в кабинете администратора (настраиваемый PIN-код, по умолчанию 1234)
  */
 export const DEFAULT_ADMIN_PIN = '1234';
+
+export function getAdminPin(): string {
+  if (typeof window === 'undefined') return DEFAULT_ADMIN_PIN;
+  try {
+    const custom = window.localStorage.getItem(ADMIN_PIN_KEY);
+    return custom && custom.trim() ? custom.trim() : DEFAULT_ADMIN_PIN;
+  } catch {
+    return DEFAULT_ADMIN_PIN;
+  }
+}
+
+export function setAdminPin(newPin: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(ADMIN_PIN_KEY, newPin.trim());
+  } catch {
+    // ignore
+  }
+}
+
+export function resetAdminPin(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(ADMIN_PIN_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+export function verifyAdminPin(enteredPin: string): boolean {
+  return enteredPin.trim() === getAdminPin();
+}
 
 export function getAdminAuthStatus(): boolean {
   if (typeof window === 'undefined') return false;

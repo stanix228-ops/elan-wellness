@@ -5,6 +5,7 @@ import {
   Check,
   CheckCircle2,
   Clock,
+  Copy,
   Download,
   Edit3,
   ExternalLink,
@@ -28,6 +29,12 @@ import {
   Users,
   X,
 } from 'lucide-react';
+import {
+  BRAND_PRESETS_LIST,
+  getActiveBrandPreset,
+  setBrandPreset,
+  type BrandPreset,
+} from '@/config/brandPresets';
 import {
   Dialog,
   DialogContent,
@@ -196,6 +203,17 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [pinChangeSuccess, setPinChangeSuccess] = React.useState<string | null>(null);
   const [pinChangeError, setPinChangeError] = React.useState<string | null>(null);
 
+  // Активный бренд студии (White-label)
+  const [activeBrandPreset, setActiveBrandPreset] = React.useState<BrandPreset>(
+    () => getActiveBrandPreset()
+  );
+  const [showDemoBarOnSite, setShowDemoBarOnSite] = React.useState<boolean>(
+    () =>
+      typeof window !== 'undefined'
+        ? window.localStorage.getItem('elan_show_demo_bar') === 'true'
+        : false
+  );
+
   // Перезагрузка списка при открытии
   React.useEffect(() => {
     if (open) {
@@ -207,6 +225,10 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       setSpecialistFeedback(null);
       setPinChangeSuccess(null);
       setPinChangeError(null);
+      setActiveBrandPreset(getActiveBrandPreset());
+      setShowDemoBarOnSite(
+        window.localStorage.getItem('elan_show_demo_bar') === 'true'
+      );
       setIsAuthenticated(getAdminAuthStatus());
     }
   }, [open]);
@@ -2331,6 +2353,116 @@ export const AdminModal: React.FC<AdminModalProps> = ({
               {/* ================= ВКЛАДКА 6: НАСТРОЙКИ, БЕЗОПАСНОСТЬ И ДАННЫЕ ================= */}
               {activeTab === 'settings' && (
                 <div className="space-y-5 max-w-xl">
+                  {/* ВЫБОР ПРОФИЛЯ СТУДИИ (WHITE-LABEL) */}
+                  <div className="rounded-2xl border-2 border-[#667052]/40 bg-[#FFFCF6] p-5 space-y-4 shadow-xs">
+                    <div className="flex items-center justify-between border-b border-[#E5E0D5] pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#667052]/15 text-[#667052]">
+                          <Sparkles className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="font-serif text-lg font-medium text-[#292A23]">
+                            Профиль бренда студии (White-label)
+                          </p>
+                          <p className="text-xs text-[#77776B]">
+                            Переключайте сайт под конкретного клиента в один клик
+                          </p>
+                        </div>
+                      </div>
+
+                      <span className="hidden sm:inline-block rounded-full bg-[#667052]/15 text-[#4F5B3E] px-2.5 py-0.5 text-xs font-semibold">
+                        Активен: {activeBrandPreset.shortName}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                      {BRAND_PRESETS_LIST.map((preset) => {
+                        const isCurrent = preset.id === activeBrandPreset.id;
+                        return (
+                          <button
+                            key={preset.id}
+                            type="button"
+                            onClick={() => {
+                              const updated = setBrandPreset(preset.id);
+                              setActiveBrandPreset(updated);
+                            }}
+                            className={cn(
+                              'p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5',
+                              isCurrent
+                                ? 'border-[#667052] bg-[#667052]/10 ring-1 ring-[#667052]'
+                                : 'border-[#E5E0D5] bg-[#F7F4ED]/60 hover:border-[#C6B99F]'
+                            )}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-serif font-bold text-sm text-[#292A23]">
+                                {preset.shortName}
+                              </span>
+                              <span
+                                className="h-3 w-3 rounded-full border border-black/10"
+                                style={{ backgroundColor: preset.theme.primary }}
+                              />
+                            </div>
+                            <p className="text-xs font-medium text-[#667052] truncate">
+                              {preset.name}
+                            </p>
+                            <p className="text-[11px] text-[#77776B]">
+                              {preset.city} · {preset.id === 'aura' ? 'Терракот' : preset.id === 'nordic' ? 'Шалфей' : 'Олива'}
+                            </p>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="rounded-xl border border-[#E5E0D5] bg-[#F7F4ED] p-3 text-xs space-y-2.5">
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+                        <span className="text-[#5E5E53] font-medium">
+                          Чистая ссылка для клиента:
+                        </span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => {
+                            const url = new URL(window.location.href);
+                            url.searchParams.set('brand', activeBrandPreset.id);
+                            url.searchParams.delete('demo');
+                            url.hash = '';
+                            navigator.clipboard.writeText(url.toString());
+                            alert(`Чистая ссылка скопирована в буфер обмена!\n\n${url.toString()}\n\nКлиент откроет сайт без каких-либо панелей разработчика.`);
+                          }}
+                          className="h-8 text-xs bg-[#667052] hover:bg-[#4F5B3E] text-[#FFFCF6] gap-1.5 cursor-pointer shadow-xs"
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                          <span>Скопировать чистую ссылку</span>
+                        </Button>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-[#E5E0D5]">
+                        <label
+                          htmlFor="toggle-demo-bar"
+                          className="text-xs text-[#5E5E53] cursor-pointer"
+                        >
+                          Отображать плавающую демо-панель на сайте для быстрых тестов
+                        </label>
+                        <input
+                          id="toggle-demo-bar"
+                          type="checkbox"
+                          checked={showDemoBarOnSite}
+                          onChange={(e) => {
+                            const val = e.target.checked;
+                            setShowDemoBarOnSite(val);
+                            if (val) {
+                              window.localStorage.setItem('elan_show_demo_bar', 'true');
+                            } else {
+                              window.localStorage.removeItem('elan_show_demo_bar');
+                            }
+                            window.location.reload();
+                          }}
+                          className="h-4 w-4 rounded border-[#C6B99F] text-[#667052] focus:ring-[#667052] cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   {/* СМЕНА PIN-КОДА АДМИНИСТРАТОРА */}
                   <div className="rounded-2xl border-2 border-[#667052]/40 bg-[#FFFCF6] p-5 space-y-4 shadow-xs">
                     <div className="flex items-center justify-between border-b border-[#E5E0D5] pb-3">

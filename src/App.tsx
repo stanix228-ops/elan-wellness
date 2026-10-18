@@ -15,6 +15,8 @@ import { BookingModal } from '@/components/booking/BookingModal';
 import { GiftCertificateModal } from '@/components/booking/GiftCertificateModal';
 import { LegalModal, type LegalDocType } from '@/components/booking/LegalModal';
 import { AdminModal } from '@/components/admin/AdminModal';
+import { BrandSwitcherBar } from '@/components/brand/BrandSwitcherBar';
+import { getActiveBrandPreset, type BrandPreset } from '@/config/brandPresets';
 import { studioConfig } from '@/config/studioConfig';
 import {
   Dialog,
@@ -46,6 +48,20 @@ export function App() {
 
   const [legalDocType, setLegalDocType] = React.useState<LegalDocType>(null);
   const [adminModalOpen, setAdminModalOpen] = React.useState(false);
+
+  const [activeBrandPreset, setActiveBrandPreset] = React.useState<BrandPreset>(
+    () => getActiveBrandPreset()
+  );
+
+  React.useEffect(() => {
+    const handleBrandChange = (e: CustomEvent<BrandPreset>) => {
+      setActiveBrandPreset(e.detail);
+    };
+    window.addEventListener('elan_brand_changed', handleBrandChange as EventListener);
+    return () => {
+      window.removeEventListener('elan_brand_changed', handleBrandChange as EventListener);
+    };
+  }, []);
 
   const [sessionBookings, setSessionBookings] = React.useState<
     DemoBookingRecord[]
@@ -283,6 +299,9 @@ export function App() {
         onOpenChange={setAdminModalOpen}
         onBookingsUpdated={handleBookingCreated}
       />
+
+      {/* Быстрый переключатель бренда студии для клиентов */}
+      <BrandSwitcherBar />
     </div>
   );
 }

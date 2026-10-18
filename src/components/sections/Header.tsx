@@ -63,13 +63,16 @@ export const Header: React.FC<HeaderProps> = ({
         <a
           href="#top"
           className="group flex flex-col focus-visible:outline-none"
-          aria-label="ÉLAN Wellness — На главную"
+          aria-label={`${BRAND_CONFIG.name} — На главную`}
         >
           <span className="font-serif text-2xl sm:text-[28px] font-medium tracking-[0.06em] text-[#292A23] leading-none">
-            ÉLAN <span className="italic font-normal text-[#667052]">Wellness</span>
+            {BRAND_CONFIG.shortName}{' '}
+            <span className="italic font-normal text-[#667052]">
+              {BRAND_CONFIG.name.replace(BRAND_CONFIG.shortName, '').trim()}
+            </span>
           </span>
           <span className="mt-1 text-[9px] uppercase tracking-[0.26em] text-[#77776B]">
-            Private Sanctuary
+            {BRAND_CONFIG.city} · Private Sanctuary
           </span>
         </a>
 
@@ -170,7 +173,10 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="space-y-8 pt-2">
                 <div>
                   <SheetTitle className="tracking-[0.04em]">
-                    ÉLAN <span className="italic font-normal text-[#667052]">Wellness</span>
+                    {BRAND_CONFIG.shortName}{' '}
+                    <span className="italic font-normal text-[#667052]">
+                      {BRAND_CONFIG.name.replace(BRAND_CONFIG.shortName, '').trim()}
+                    </span>
                   </SheetTitle>
                   <SheetDescription className="mt-1 uppercase tracking-[0.2em]">
                     {BRAND_CONFIG.tagline}

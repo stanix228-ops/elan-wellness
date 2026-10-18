@@ -182,10 +182,10 @@ export const ContactsFooter: React.FC<ContactsFooterProps> = ({
                 </div>
                 <div>
                   <p className="font-serif text-xl font-medium text-[#292A23]">
-                    ÉLAN Wellness Sanctuary
+                    {BRAND_CONFIG.name}
                   </p>
                   <p className="text-xs text-[#5E5E53]">
-                    Тихий внутренний двор · Отдельный вход без вывески на фасаде
+                    {BRAND_CONFIG.city} · Отдельный вход и приватное пространство
                   </p>
                 </div>
               </div>
@@ -203,7 +203,7 @@ export const ContactsFooter: React.FC<ContactsFooterProps> = ({
                 </div>
                 {showRouteNote && (
                   <p className="pt-2 border-t border-[#E5E0D5] text-[#292A23]">
-                    Демо-маршрут: вход через кованую арку между домами 22 и 24, далее направо к двухэтажному флигелю цвета тёплого известняка. За 30 минут до визита гостю направляется код доступа.
+                    Демо-маршрут: вход через отдельную входную группу, далее к сьютам студии. За 30 минут до визита гостю направляется памятка в мессенджер.
                   </p>
                 )}
               </div>
@@ -215,8 +215,11 @@ export const ContactsFooter: React.FC<ContactsFooterProps> = ({
         <div className="pt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 text-xs text-[#77776B]">
           <div className="space-y-1">
             <p className="font-serif text-lg text-[#292A23]">
-              ÉLAN <span className="italic text-[#667052]">Wellness</span> · ©{' '}
-              {new Date().getFullYear()}
+              {BRAND_CONFIG.shortName}{' '}
+              <span className="italic text-[#667052]">
+                {BRAND_CONFIG.name.replace(BRAND_CONFIG.shortName, '').trim()}
+              </span>{' '}
+              · © {new Date().getFullYear()}
             </p>
             <p>{BRAND_CONFIG.isDemoNotice}</p>
           </div>

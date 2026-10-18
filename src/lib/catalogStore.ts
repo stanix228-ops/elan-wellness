@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { studioConfig, type StudioService, type StudioSpecialist } from '@/config/studioConfig';
+import { getActiveBrandPreset, getActiveBrandPresetId } from '@/config/brandPresets';
 
 export type WellnessService = StudioService;
 export type SpecialistProfile = StudioSpecialist;
@@ -7,6 +8,26 @@ export type SpecialistProfile = StudioSpecialist;
 const SERVICES_STORAGE_KEY = 'elan_wellness_services_v1';
 const SPECIALISTS_STORAGE_KEY = 'elan_wellness_specialists_v1';
 const CATALOG_EVENT_NAME = 'elan_catalog_updated';
+
+function getActiveServicesKey(): string {
+  const presetId = getActiveBrandPresetId();
+  return `${SERVICES_STORAGE_KEY}_${presetId}`;
+}
+
+function getActiveSpecialistsKey(): string {
+  const presetId = getActiveBrandPresetId();
+  return `${SPECIALISTS_STORAGE_KEY}_${presetId}`;
+}
+
+function getDefaultServices(): WellnessService[] {
+  const preset = getActiveBrandPreset();
+  return preset.services && preset.services.length > 0 ? preset.services : studioConfig.services.items;
+}
+
+function getDefaultSpecialists(): SpecialistProfile[] {
+  const preset = getActiveBrandPreset();
+  return preset.specialists && preset.specialists.length > 0 ? preset.specialists : studioConfig.specialists.items;
+}
 
 /**
  * Библиотека проверенных высококачественных фотографий студии для удобного выбора
@@ -74,24 +95,30 @@ function notifyCatalogUpdate() {
 // ==================== УСЛУГИ ====================
 
 export function getServicesCatalog(): WellnessService[] {
-  if (typeof window === 'undefined') return studioConfig.services.items;
+  if (typeof window === 'undefined') return getDefaultServices();
   try {
-    const raw = window.localStorage.getItem(SERVICES_STORAGE_KEY);
-    if (!raw) return studioConfig.services.items;
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed;
+    const raw = window.localStorage.getItem(getActiveServicesKey());
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     }
-    return studioConfig.services.items;
+    if (getActiveBrandPresetId() === 'elan') {
+      const legacy = window.localStorage.getItem(SERVICES_STORAGE_KEY);
+      if (legacy) {
+        const parsed = JSON.parse(legacy);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    }
+    return getDefaultServices();
   } catch {
-    return studioConfig.services.items;
+    return getDefaultServices();
   }
 }
 
 export function saveServicesCatalog(items: WellnessService[]): void {
   if (typeof window === 'undefined') return;
   try {
-    window.localStorage.setItem(SERVICES_STORAGE_KEY, JSON.stringify(items));
+    window.localStorage.setItem(getActiveServicesKey(), JSON.stringify(items));
     notifyCatalogUpdate();
   } catch {
     // ignore
@@ -123,33 +150,39 @@ export function deleteService(serviceId: string): WellnessService[] {
 
 export function resetServicesCatalog(): WellnessService[] {
   if (typeof window !== 'undefined') {
-    window.localStorage.removeItem(SERVICES_STORAGE_KEY);
+    window.localStorage.removeItem(getActiveServicesKey());
     notifyCatalogUpdate();
   }
-  return studioConfig.services.items;
+  return getDefaultServices();
 }
 
 // ==================== СПЕЦИАЛИСТЫ ====================
 
 export function getSpecialistsCatalog(): SpecialistProfile[] {
-  if (typeof window === 'undefined') return studioConfig.specialists.items;
+  if (typeof window === 'undefined') return getDefaultSpecialists();
   try {
-    const raw = window.localStorage.getItem(SPECIALISTS_STORAGE_KEY);
-    if (!raw) return studioConfig.specialists.items;
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed;
+    const raw = window.localStorage.getItem(getActiveSpecialistsKey());
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     }
-    return studioConfig.specialists.items;
+    if (getActiveBrandPresetId() === 'elan') {
+      const legacy = window.localStorage.getItem(SPECIALISTS_STORAGE_KEY);
+      if (legacy) {
+        const parsed = JSON.parse(legacy);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    }
+    return getDefaultSpecialists();
   } catch {
-    return studioConfig.specialists.items;
+    return getDefaultSpecialists();
   }
 }
 
 export function saveSpecialistsCatalog(items: SpecialistProfile[]): void {
   if (typeof window === 'undefined') return;
   try {
-    window.localStorage.setItem(SPECIALISTS_STORAGE_KEY, JSON.stringify(items));
+    window.localStorage.setItem(getActiveSpecialistsKey(), JSON.stringify(items));
     notifyCatalogUpdate();
   } catch {
     // ignore
@@ -181,10 +214,10 @@ export function deleteSpecialist(specialistId: string): SpecialistProfile[] {
 
 export function resetSpecialistsCatalog(): SpecialistProfile[] {
   if (typeof window !== 'undefined') {
-    window.localStorage.removeItem(SPECIALISTS_STORAGE_KEY);
+    window.localStorage.removeItem(getActiveSpecialistsKey());
     notifyCatalogUpdate();
   }
-  return studioConfig.specialists.items;
+  return getDefaultSpecialists();
 }
 
 // ==================== REACT HOOK ДЛЯ ЖИВОГО ОБНОВЛЕНИЯ ====================
@@ -206,10 +239,12 @@ export function useStudioCatalog() {
     const handleUpdate = () => refresh();
 
     window.addEventListener(CATALOG_EVENT_NAME, handleUpdate);
+    window.addEventListener('elan_brand_changed', handleUpdate);
     window.addEventListener('storage', handleUpdate);
 
     return () => {
       window.removeEventListener(CATALOG_EVENT_NAME, handleUpdate);
+      window.removeEventListener('elan_brand_changed', handleUpdate);
       window.removeEventListener('storage', handleUpdate);
     };
   }, [refresh]);

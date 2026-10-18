@@ -43,7 +43,7 @@ export const GiftCertificatesSection: React.FC<GiftCertificatesSectionProps> = (
               <div className="rounded-2xl border border-[#C6B99F]/70 bg-[#FFFCF6] p-6 shadow-sm space-y-4">
                 <div className="flex items-center justify-between border-b border-[#E5E0D5] pb-3">
                   <span className="font-serif text-xl tracking-[0.06em] text-[#292A23]">
-                    ÉLAN <span className="italic text-[#667052]">Wellness</span>
+                    {BRAND_CONFIG.name}
                   </span>
                   <span className="text-[10px] uppercase tracking-[0.24em] text-[#77776B]">
                     GIFT INVITATION · DEMO

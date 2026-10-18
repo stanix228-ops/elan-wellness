@@ -99,7 +99,7 @@ export const ContactsFooter: React.FC<ContactsFooterProps> = ({
                 </Button>
 
                 <a
-                  href={`https://yandex.ru/maps/?text=${encodeURIComponent(contacts.address)}`}
+                  href={(contacts as any).yandexMapsUrl || `https://yandex.ru/maps/?text=${encodeURIComponent(contacts.address)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex h-12 items-center gap-2 rounded-full border border-[#E5E0D5] bg-[#FFFCF6] px-5 text-xs font-medium text-[#292A23] transition-colors hover:border-[#667052] hover:text-[#667052]"
@@ -168,11 +168,16 @@ export const ContactsFooter: React.FC<ContactsFooterProps> = ({
               <div className="relative z-10 flex flex-wrap items-center justify-between gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFFCF6] border border-[#E5E0D5] px-3.5 py-1.5 text-xs font-medium text-[#292A23]">
                   <Compass className="h-3.5 w-3.5 text-[#667052]" aria-hidden="true" />
-                  <span>Схема расположения · Патриаршие пруды (Демо-локация)</span>
+                  <span>Локация студии · {contacts.addressLine2 || contacts.addressLine1}</span>
                 </span>
-                <span className="rounded-full bg-[#F7F4ED]/90 border border-[#C6B99F]/60 px-3 py-1 text-[11px] text-[#5E5E53]">
-                  Интерактивная карта подключается по API-ключу
-                </span>
+                <a
+                  href={(contacts as any).yandexMapsUrl || `https://yandex.ru/maps/?text=${encodeURIComponent(contacts.address)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-full bg-[#FFFCF6] border border-[#C6B99F] hover:border-[#667052] px-3 py-1 text-[11px] font-medium text-[#667052] hover:text-[#4F5B3E] transition-colors"
+                >
+                  Открыть на Яндекс Картах ↗
+                </a>
               </div>
 
               {/* Центральный пин студии */}

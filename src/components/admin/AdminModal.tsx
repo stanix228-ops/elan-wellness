@@ -2375,7 +2375,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                       {BRAND_PRESETS_LIST.map((preset) => {
                         const isCurrent = preset.id === activeBrandPreset.id;
                         return (
@@ -2406,7 +2406,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                               {preset.name}
                             </p>
                             <p className="text-[11px] text-[#77776B]">
-                              {preset.city} · {preset.id === 'aura' ? 'Терракот' : preset.id === 'nordic' ? 'Шалфей' : 'Олива'}
+                              {preset.city} · {preset.paletteName || preset.currencySymbol}
                             </p>
                           </button>
                         );

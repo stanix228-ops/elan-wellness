@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { studioConfig } from '@/config/studioConfig';
+import { getActiveBrandPreset } from '@/config/brandPresets';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -8,8 +8,10 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatPrice(
   price: number,
-  currency: string = studioConfig.brand.currencySymbol
+  currency?: string
 ): string {
-  return new Intl.NumberFormat('ru-RU').format(price) + ' ' + currency;
+  const symbol = currency || getActiveBrandPreset().currencySymbol || '₽';
+  return new Intl.NumberFormat('ru-RU').format(price) + ' ' + symbol;
 }
+
 

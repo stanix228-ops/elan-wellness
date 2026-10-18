@@ -138,7 +138,7 @@ export const BrandSwitcherBar: React.FC = () => {
         </div>
 
         {/* Кнопки пресетов */}
-        <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
           {BRAND_PRESETS_LIST.map((preset) => {
             const isActive = preset.id === currentPresetId;
             return (
@@ -153,8 +153,8 @@ export const BrandSwitcherBar: React.FC = () => {
                     : 'border-[#E5E0D5] bg-[#F7F4ED]/60 hover:bg-[#F7F4ED] hover:border-[#C6B99F]'
                 )}
               >
-                <div className="flex items-center justify-between">
-                  <span className="font-serif text-xs sm:text-sm font-semibold text-[#292A23] truncate">
+                <div className="flex items-center justify-between gap-1">
+                  <span className="font-serif text-xs font-semibold text-[#292A23] truncate">
                     {preset.shortName}
                   </span>
                   <span
@@ -163,7 +163,7 @@ export const BrandSwitcherBar: React.FC = () => {
                   />
                 </div>
                 <p className="text-[10px] text-[#77776B] truncate mt-0.5">
-                  {preset.city} · {preset.id === 'aura' ? 'Терракот' : preset.id === 'nordic' ? 'Шалфей' : 'Олива'}
+                  {preset.city} · {preset.paletteName || preset.currencySymbol}
                 </p>
               </button>
             );

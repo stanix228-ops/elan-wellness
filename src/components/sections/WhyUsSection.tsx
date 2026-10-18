@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Award, Feather, Leaf, Sparkles } from 'lucide-react';
 import { studioConfig } from '@/config/studioConfig';
+import { BRAND_CONFIG } from '@/config/brand';
 
 const iconMap = {
   Sparkles,
@@ -72,7 +73,7 @@ export const WhyUsSection: React.FC = () => {
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-[#E5E0D5]/70 text-[11px] text-[#77776B]">
-                  Стандарт ÉLAN Wellness
+                  Стандарт {BRAND_CONFIG.name}
                 </div>
               </article>
             );

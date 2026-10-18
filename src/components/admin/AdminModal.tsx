@@ -2375,7 +2375,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 max-h-80 overflow-y-auto pr-1">
                       {BRAND_PRESETS_LIST.map((preset) => {
                         const isCurrent = preset.id === activeBrandPreset.id;
                         return (

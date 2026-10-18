@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --elan-bg: #F7F4ED;
+    --elan-surface: #FFFCF6;
+    --elan-primary: #667052;
+    --elan-primary-hover: #4F5B3E;
+    --elan-text: #292A23;
+    --elan-text-muted: #5E5E53;
+    --elan-text-subtle: #77776B;
+    --elan-border: #E5E0D5;
+    --elan-accent: #C6B99F;
+    --elan-accent-soft: #EFECE4;
+  }
+
+  html {
+    background-color: var(--elan-bg);
+    color: var(--elan-text);
+    font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+    scroll-padding-top: 5.5rem;
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    background-color: var(--elan-bg);
+    color: var(--elan-text);
+    overflow-x: hidden;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  h1, h2, h3, h4, .font-editorial {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+  }
+
+  /* Focus ring for keyboard accessibility */
+  *:focus-visible {
+    outline: 2px solid var(--elan-primary);
+    outline-offset: 2px;
+  }
+}
+
+/* Smooth reveal animations that respect prefers-reduced-motion */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal-up {
+    animation: fadeUpCalm 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .image-zoom-calm {
+    transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .group:hover .image-zoom-calm {
+    transform: scale(1.03);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes fadeUpCalm {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F7F4ED;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D5CEBF;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #667052;
+}

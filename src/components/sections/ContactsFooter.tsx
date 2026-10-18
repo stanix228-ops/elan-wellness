@@ -14,11 +14,13 @@ import type { LegalDocType } from '@/components/booking/LegalModal';
 interface ContactsFooterProps {
   onOpenBooking: () => void;
   onOpenLegalModal: (type: LegalDocType) => void;
+  onOpenAdminModal?: () => void;
 }
 
 export const ContactsFooter: React.FC<ContactsFooterProps> = ({
   onOpenBooking,
   onOpenLegalModal,
+  onOpenAdminModal,
 }) => {
   const { contacts } = BRAND_CONFIG;
   const [showRouteNote, setShowRouteNote] = React.useState(false);
@@ -220,6 +222,13 @@ export const ContactsFooter: React.FC<ContactsFooterProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-6">
+            <button
+              type="button"
+              onClick={onOpenAdminModal}
+              className="text-[#667052] hover:text-[#292A23] font-medium underline underline-offset-4 cursor-pointer"
+            >
+              Кабинет студии (CRM)
+            </button>
             <button
               type="button"
               onClick={() => onOpenLegalModal('privacy')}

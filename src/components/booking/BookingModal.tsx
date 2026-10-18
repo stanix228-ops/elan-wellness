@@ -309,10 +309,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl p-5 sm:p-8 max-h-[92vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl p-0 flex flex-col max-h-[94vh] sm:max-h-[88vh] h-[92vh] sm:h-[84vh] overflow-hidden rounded-[24px]">
         {completedBooking ? (
           /* SUCCESS STATE — ВАША ЗАПИСЬ ПОДТВЕРЖДЕНА */
-          <div className="py-2 sm:py-4 space-y-7 animate-fade-up">
+          <div className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-7 animate-fade-up">
             {/* Большая check icon по спецификации */}
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#667052]/15 text-[#667052] ring-8 ring-[#667052]/10">
               <Check className="h-10 w-10 text-[#667052]" strokeWidth={2.5} aria-hidden="true" />
@@ -461,128 +461,133 @@ export const BookingModal: React.FC<BookingModalProps> = ({
           </div>
         ) : (
           /* ПОШАГОВЫЙ СЦЕНАРИЙ ОНЛАЙН-ЗАПИСИ (ШАГИ 1–6) */
-          <>
-            <DialogHeader>
-              <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.16em] text-[#667052]">
-                <span>{studioConfig.brand.name}</span>
-                <span aria-hidden="true">·</span>
-                <span>Шаг {step} из 6</span>
-              </div>
-              <DialogTitle className="mt-1 font-serif text-2xl sm:text-3xl text-[#292A23]">
-                {STEP_LABELS[step - 1].title}
-              </DialogTitle>
-              <DialogDescription className="text-xs sm:text-sm text-[#5E5E53]">
-                {step === 1 &&
-                  'Выберите подходящую технику массажа. Мастер скорректирует нажим и акценты перед началом сеанса.'}
-                {step === 2 &&
-                  'Выберите конкретного мастера или опцию «Любой свободный специалист» для максимального выбора времени.'}
-                {step === 3 &&
-                  'Выберите желаемую дату визита. Прошедшие дни автоматически заблокированы.'}
-                {step === 4 &&
-                  'Выберите удобное время. Между сеансами мы оставляем 25 минут для проветривания и подготовки сьюта.'}
-                {step === 5 &&
-                  'Укажите контактные данные для согласования деталей и подтверждения визита.'}
-                {step === 6 &&
-                  'Проверьте все параметры визита перед окончательным подтверждением.'}
-              </DialogDescription>
-            </DialogHeader>
+          <div className="flex flex-col h-full min-h-0">
+            {/* 1. ФИКСИРОВАННАЯ ШАПКА ШАГОВ */}
+            <div className="shrink-0 p-4 sm:p-6 pb-3 border-b border-[#E5E0D5] bg-[#FFFCF6] relative z-10 space-y-2.5">
+              <DialogHeader>
+                <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.16em] text-[#667052]">
+                  <span>{studioConfig.brand.name}</span>
+                  <span aria-hidden="true">·</span>
+                  <span>Шаг {step} из 6</span>
+                </div>
+                <DialogTitle className="mt-0.5 font-serif text-xl sm:text-2xl text-[#292A23]">
+                  {STEP_LABELS[step - 1].title}
+                </DialogTitle>
+                <DialogDescription className="text-xs sm:text-sm text-[#5E5E53] line-clamp-1 sm:line-clamp-2">
+                  {step === 1 &&
+                    'Выберите подходящую технику массажа. Мастер скорректирует нажим и акценты перед началом сеанса.'}
+                  {step === 2 &&
+                    'Выберите конкретного мастера или опцию «Любой свободный специалист» для максимального выбора времени.'}
+                  {step === 3 &&
+                    'Выберите желаемую дату визита. Прошедшие дни автоматически заблокированы.'}
+                  {step === 4 &&
+                    'Выберите удобное время. Между сеансами мы оставляем 25 минут для проветривания и подготовки сьюта.'}
+                  {step === 5 &&
+                    'Укажите контактные данные для согласования деталей и подтверждения визита.'}
+                  {step === 6 &&
+                    'Проверьте все параметры визита перед окончательным подтверждением.'}
+                </DialogDescription>
+              </DialogHeader>
 
-            {/* Прогресс-бар с номерами шагов */}
-            <nav
-              aria-label="Шаги бронирования"
-              className="grid grid-cols-6 gap-1.5 sm:gap-2 border-y border-[#E5E0D5] py-2.5 my-2"
-            >
-              {STEP_LABELS.map((item) => {
-                const isCurrent = item.step === step;
-                const isDone = item.step < step;
-                const isAccessible = item.step <= step;
-
-                return (
-                  <button
-                    key={item.step}
-                    type="button"
-                    disabled={!isAccessible}
-                    onClick={() => isAccessible && setStep(item.step)}
-                    aria-current={isCurrent ? 'step' : undefined}
-                    className={cn(
-                      'flex flex-col items-center gap-1 rounded-lg py-1 px-1 text-center transition-all cursor-pointer',
-                      isCurrent && 'bg-[#667052]/10 text-[#4F5B3E] font-semibold',
-                      isDone && 'text-[#667052] hover:bg-[#F7F4ED]',
-                      !isAccessible && 'text-[#77776B]/40 cursor-not-allowed opacity-60'
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-colors',
-                        isCurrent
-                          ? 'bg-[#667052] text-[#FFFCF6]'
-                          : isDone
-                          ? 'bg-[#EFECE4] text-[#4F5B3E]'
-                          : 'bg-[#E5E0D5] text-[#77776B]'
-                      )}
-                    >
-                      {isDone ? <Check className="h-3.5 w-3.5" /> : item.step}
-                    </span>
-                    <span
-                      className={cn(
-                        'hidden sm:inline text-[10px] font-medium truncate w-full',
-                        isCurrent ? 'text-[#292A23]' : 'text-[#77776B]'
-                      )}
-                    >
-                      {item.short}
-                    </span>
-                  </button>
-                );
-              })}
-            </nav>
-
-            {/* Сводка уже выбранных параметров на шагах 2–5 */}
-            {step > 1 && step < 6 && (
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-[#E5E0D5] bg-[#F7F4ED] px-3.5 py-2 text-xs text-[#5E5E53]">
-                <span className="font-medium text-[#292A23]">
-                  {selectedService.title} ({selectedService.durationMinutes} мин ·{' '}
-                  {formatPrice(selectedService.price)})
-                </span>
-                {step > 2 && (
-                  <>
-                    <span aria-hidden="true" className="text-[#C6B99F]">
-                      •
-                    </span>
-                    <span>{specialistDisplayName}</span>
-                  </>
-                )}
-                {step > 3 && dateIso && (
-                  <>
-                    <span aria-hidden="true" className="text-[#C6B99F]">
-                      •
-                    </span>
-                    <span className="capitalize">{formatHumanDate(dateIso)}</span>
-                  </>
-                )}
-                {step > 4 && timeSlot && (
-                  <>
-                    <span aria-hidden="true" className="text-[#C6B99F]">
-                      •
-                    </span>
-                    <span className="font-semibold text-[#667052]">{timeSlot}</span>
-                  </>
-                )}
-              </div>
-            )}
-
-            {/* Ошибка текущего шага */}
-            {stepError && (
-              <div
-                role="alert"
-                className="rounded-xl border border-[#B44C3E]/40 bg-[#B44C3E]/10 px-4 py-2.5 text-xs sm:text-sm text-[#8C3327]"
+              {/* Прогресс-бар с номерами шагов */}
+              <nav
+                aria-label="Шаги бронирования"
+                className="grid grid-cols-6 gap-1.5 sm:gap-2 border-y border-[#E5E0D5] py-2"
               >
-                {stepError}
-              </div>
-            )}
+                {STEP_LABELS.map((item) => {
+                  const isCurrent = item.step === step;
+                  const isDone = item.step < step;
+                  const isAccessible = item.step <= step;
 
-            {/* ШАГ 1: ВЫБЕРИТЕ УСЛУГУ (Фото, название, описание, длительность, цена) */}
-            {step === 1 && (
-              <div className="space-y-4">
+                  return (
+                    <button
+                      key={item.step}
+                      type="button"
+                      disabled={!isAccessible}
+                      onClick={() => isAccessible && setStep(item.step)}
+                      aria-current={isCurrent ? 'step' : undefined}
+                      className={cn(
+                        'flex flex-col items-center gap-1 rounded-lg py-1 px-1 text-center transition-all cursor-pointer',
+                        isCurrent && 'bg-[#667052]/10 text-[#4F5B3E] font-semibold',
+                        isDone && 'text-[#667052] hover:bg-[#F7F4ED]',
+                        !isAccessible && 'text-[#77776B]/40 cursor-not-allowed opacity-60'
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-colors',
+                          isCurrent
+                            ? 'bg-[#667052] text-[#FFFCF6]'
+                            : isDone
+                            ? 'bg-[#EFECE4] text-[#4F5B3E]'
+                            : 'bg-[#E5E0D5] text-[#77776B]'
+                        )}
+                      >
+                        {isDone ? <Check className="h-3.5 w-3.5" /> : item.step}
+                      </span>
+                      <span
+                        className={cn(
+                          'hidden sm:inline text-[10px] font-medium truncate w-full',
+                          isCurrent ? 'text-[#292A23]' : 'text-[#77776B]'
+                        )}
+                      >
+                        {item.short}
+                      </span>
+                    </button>
+                  );
+                })}
+              </nav>
+
+              {/* Сводка уже выбранных параметров на шагах 2–5 */}
+              {step > 1 && step < 6 && (
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-[#E5E0D5] bg-[#F7F4ED] px-3 py-1.5 text-xs text-[#5E5E53]">
+                  <span className="font-medium text-[#292A23]">
+                    {selectedService.title} ({selectedService.durationMinutes} мин ·{' '}
+                    {formatPrice(selectedService.price)})
+                  </span>
+                  {step > 2 && (
+                    <>
+                      <span aria-hidden="true" className="text-[#C6B99F]">
+                        •
+                      </span>
+                      <span>{specialistDisplayName}</span>
+                    </>
+                  )}
+                  {step > 3 && dateIso && (
+                    <>
+                      <span aria-hidden="true" className="text-[#C6B99F]">
+                        •
+                      </span>
+                      <span className="capitalize">{formatHumanDate(dateIso)}</span>
+                    </>
+                  )}
+                  {step > 4 && timeSlot && (
+                    <>
+                      <span aria-hidden="true" className="text-[#C6B99F]">
+                        •
+                      </span>
+                      <span className="font-semibold text-[#667052]">{timeSlot}</span>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Ошибка текущего шага */}
+              {stepError && (
+                <div
+                  role="alert"
+                  className="rounded-xl border border-[#B44C3E]/40 bg-[#B44C3E]/10 px-4 py-2 text-xs sm:text-sm text-[#8C3327]"
+                >
+                  {stepError}
+                </div>
+              )}
+            </div>
+
+            {/* 2. СКРОЛЛИРУЕМОЕ СОДЕРЖИМОЕ ШАГА */}
+            <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-4">
+              {/* ШАГ 1: ВЫБЕРИТЕ УСЛУГУ (Фото, название, описание, длительность, цена) */}
+              {step === 1 && (
+                <div className="space-y-4">
                 <div
                   className="flex flex-wrap gap-1.5"
                   role="tablist"
@@ -1161,54 +1166,67 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 </div>
               </div>
             )}
+            </div>
 
-            {/* Кнопки навигации по шагам */}
-            <div className="flex items-center justify-between gap-3 pt-4 border-t border-[#E5E0D5]">
+            {/* 3. ФИКСИРОВАННЫЙ НИЖНИЙ БАР (ВСЕГДА ВИДЕН НА МОБИЛЬНЫХ И ДЕСКТОПЕ БЕЗ СКРОЛЛА) */}
+            <div className="shrink-0 bg-[#FFFCF6] border-t border-[#E5E0D5] p-3 sm:p-4 px-4 sm:px-6 flex items-center justify-between gap-3 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] z-20 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
               {step > 1 ? (
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handlePrevStep}
                   disabled={isSubmitting}
+                  className="h-11 sm:h-12 px-4 sm:px-5 text-xs sm:text-sm font-medium"
                 >
-                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                  <ArrowLeft className="h-4 w-4 mr-1.5" aria-hidden="true" />
                   <span>Назад</span>
                 </Button>
               ) : (
-                <div />
+                <div className="text-xs text-[#77776B] hidden sm:block">
+                  Шаг 1 из 6 · Выбор ритуала
+                </div>
               )}
+
+              {/* Мобильная микро-сводка выбранного пункта */}
+              <div className="sm:hidden text-[11px] text-[#5E5E53] truncate max-w-[130px] font-medium">
+                {step === 1 && selectedService?.title}
+                {step === 2 && (specialistId === 'any' ? 'Любой мастер' : specialistDisplayName)}
+                {step === 3 && dateIso && formatHumanDate(dateIso).split(',')[0]}
+                {step === 4 && (timeSlot || 'Выберите время')}
+              </div>
 
               {step < 6 ? (
                 <Button
                   type="button"
                   onClick={handleNextStep}
-                  disabled={step === 4 && isSpecialistDayOff}
+                  disabled={step === 4 && (!timeSlot || isSpecialistDayOff)}
+                  className="h-11 sm:h-12 px-6 sm:px-8 text-xs sm:text-sm font-semibold bg-[#667052] hover:bg-[#4F5B3E] text-[#FFFCF6] shadow-md ml-auto"
                 >
                   <span>Далее</span>
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  <ArrowRight className="h-4 w-4 ml-1.5" aria-hidden="true" />
                 </Button>
               ) : (
                 <Button
                   type="button"
                   onClick={handleConfirmBooking}
                   disabled={isSubmitting}
-                  className="min-w-[210px]"
+                  className="h-11 sm:h-12 px-6 sm:px-8 min-w-[200px] text-xs sm:text-sm font-semibold bg-[#667052] hover:bg-[#4F5B3E] text-[#FFFCF6] shadow-md ml-auto"
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" aria-hidden="true" />
                       <span>Формируем запись...</span>
                     </>
                   ) : (
                     <>
-                      <Check className="h-4 w-4" aria-hidden="true" />
+                      <Check className="h-4 w-4 mr-2" aria-hidden="true" />
                       <span>Подтвердить запись</span>
                     </>
                   )}
                 </Button>
               )}
             </div>
-          </>
+          </div>
         )}
       </DialogContent>
     </Dialog>

@@ -14,6 +14,14 @@ export interface BookingContactErrors {
   consentAccepted?: string;
 }
 
+export type BookingStatus = 'new' | 'confirmed' | 'completed' | 'cancelled';
+
+export interface TelegramSettings {
+  botToken: string;
+  chatId: string;
+  enabled: boolean;
+}
+
 export interface DemoBookingRecord {
   referenceCode: string;
   createdAtIso: string;
@@ -30,6 +38,7 @@ export interface DemoBookingRecord {
   guestPhone: string;
   guestComment: string;
   atmospherePreference: 'silence' | 'ambient' | 'undecided';
+  status?: BookingStatus;
   isDemoOnly: true;
 }
 
@@ -46,8 +55,11 @@ export interface DemoCertificateRequest {
   personalMessage: string;
 }
 
-const BOOKINGS_STORAGE_KEY = 'elan_wellness_demo_bookings_v1';
+const BOOKINGS_STORAGE_KEY_V2 = 'elan_wellness_bookings_v2';
+const BOOKINGS_STORAGE_KEY_V1 = 'elan_wellness_demo_bookings_v1';
 const CERTIFICATES_STORAGE_KEY = 'elan_wellness_demo_certificates_v1';
+const TELEGRAM_SETTINGS_KEY = 'elan_wellness_telegram_settings_v1';
+const ADMIN_AUTH_KEY = 'elan_wellness_admin_auth_v1';
 
 /**
  * Возвращает локальную дату в формате YYYY-MM-DD без смещения часового пояса
@@ -252,24 +264,107 @@ export function generateDemoReferenceCode(prefix = 'ELAN'): string {
 export function getSessionDemoBookings(): DemoBookingRecord[] {
   if (typeof window === 'undefined') return [];
   try {
-    const raw = window.sessionStorage.getItem(BOOKINGS_STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as DemoBookingRecord[];
+    // 1. Проверяем персистентный localStorage
+    const rawV2 = window.localStorage.getItem(BOOKINGS_STORAGE_KEY_V2);
+    if (rawV2) {
+      const parsed = JSON.parse(rawV2) as DemoBookingRecord[];
+      return parsed.map((item) => ({
+        ...item,
+        status: item.status || 'new',
+      }));
+    }
+
+    // 2. Фоллбек / миграция из старого sessionStorage
+    const rawV1 = window.sessionStorage.getItem(BOOKINGS_STORAGE_KEY_V1);
+    if (rawV1) {
+      const parsed = JSON.parse(rawV1) as DemoBookingRecord[];
+      const normalized = parsed.map((item) => ({
+        ...item,
+        status: item.status || 'new',
+      }));
+      window.localStorage.setItem(BOOKINGS_STORAGE_KEY_V2, JSON.stringify(normalized));
+      return normalized;
+    }
+
+    return [];
   } catch {
     return [];
   }
 }
 
 export function saveSessionDemoBooking(record: DemoBookingRecord): DemoBookingRecord[] {
-  if (typeof window === 'undefined') return [record];
+  const normalizedRecord: DemoBookingRecord = {
+    ...record,
+    status: record.status || 'new',
+  };
+
+  if (typeof window === 'undefined') return [normalizedRecord];
+
   try {
     const existing = getSessionDemoBookings();
-    const updated = [record, ...existing];
-    window.sessionStorage.setItem(BOOKINGS_STORAGE_KEY, JSON.stringify(updated));
+    const updated = [normalizedRecord, ...existing.filter((b) => b.referenceCode !== normalizedRecord.referenceCode)];
+    
+    // Сохраняем в оба хранилища для надёжности
+    window.localStorage.setItem(BOOKINGS_STORAGE_KEY_V2, JSON.stringify(updated));
+    window.sessionStorage.setItem(BOOKINGS_STORAGE_KEY_V1, JSON.stringify(updated));
+
+    // Проигрываем ненавязчивый звуковой сигнал
+    playNewBookingChime();
+
+    // Если подключён Telegram-бот студии — отправляем мгновенное уведомление
+    sendTelegramBookingNotification(normalizedRecord).catch(() => {
+      // Игнорируем сетевые сбои в фоновом режиме
+    });
+
     return updated;
   } catch {
-    return [record];
+    return [normalizedRecord];
   }
+}
+
+export function updateBookingStatus(
+  referenceCode: string,
+  newStatus: BookingStatus
+): DemoBookingRecord[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const list = getSessionDemoBookings();
+    const updated = list.map((item) =>
+      item.referenceCode === referenceCode ? { ...item, status: newStatus } : item
+    );
+    window.localStorage.setItem(BOOKINGS_STORAGE_KEY_V2, JSON.stringify(updated));
+    window.sessionStorage.setItem(BOOKINGS_STORAGE_KEY_V1, JSON.stringify(updated));
+    return updated;
+  } catch {
+    return [];
+  }
+}
+
+export function deleteBooking(referenceCode: string): DemoBookingRecord[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const list = getSessionDemoBookings();
+    const updated = list.filter((item) => item.referenceCode !== referenceCode);
+    window.localStorage.setItem(BOOKINGS_STORAGE_KEY_V2, JSON.stringify(updated));
+    window.sessionStorage.setItem(BOOKINGS_STORAGE_KEY_V1, JSON.stringify(updated));
+    return updated;
+  } catch {
+    return [];
+  }
+}
+
+export function clearAllBookings(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(BOOKINGS_STORAGE_KEY_V2);
+    window.sessionStorage.removeItem(BOOKINGS_STORAGE_KEY_V1);
+  } catch {
+    // ignore
+  }
+}
+
+export function getNewBookingsCount(bookings: DemoBookingRecord[]): number {
+  return bookings.filter((b) => !b.status || b.status === 'new').length;
 }
 
 export function saveSessionCertificateRequest(record: DemoCertificateRequest): void {
@@ -280,5 +375,188 @@ export function saveSessionCertificateRequest(record: DemoCertificateRequest): v
     window.sessionStorage.setItem(CERTIFICATES_STORAGE_KEY, JSON.stringify([record, ...existing]));
   } catch {
     // ignore storage errors in restricted environments
+  }
+}
+
+/**
+ * Настройки Telegram-уведомлений
+ */
+export function getTelegramSettings(): TelegramSettings {
+  if (typeof window === 'undefined') {
+    return { botToken: '', chatId: '', enabled: false };
+  }
+  try {
+    const raw = window.localStorage.getItem(TELEGRAM_SETTINGS_KEY);
+    if (!raw) return { botToken: '', chatId: '', enabled: false };
+    return JSON.parse(raw) as TelegramSettings;
+  } catch {
+    return { botToken: '', chatId: '', enabled: false };
+  }
+}
+
+export function saveTelegramSettings(settings: TelegramSettings): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(TELEGRAM_SETTINGS_KEY, JSON.stringify(settings));
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * Формирует читаемое текстовое сообщение для Telegram
+ */
+export function formatTelegramBookingMessage(booking: DemoBookingRecord): string {
+  const lines = [
+    '🌿 *НОВАЯ ЗАПИСЬ В ÉLAN WELLNESS*',
+    '━━━━━━━━━━━━━━━━━━━━',
+    `🔖 *Номер записи:* \`${booking.referenceCode}\``,
+    `👤 *Гость:* ${booking.guestName}`,
+    `📞 *Телефон:* ${booking.guestPhone}`,
+    `💆 *Процедура:* ${booking.serviceTitle} (${booking.durationMinutes} мин)`,
+    `💰 *Стоимость:* ${booking.price.toLocaleString('ru-RU')} ₸`,
+    `📅 *Дата:* ${booking.dateFormatted}`,
+    `⏰ *Время:* ${booking.timeSlot}`,
+    `🌿 *Специалист:* ${booking.specialistName}`,
+  ];
+
+  if (booking.atmospherePreference === 'silence') {
+    lines.push('🤫 *Атмосфера:* В полной тишине');
+  } else if (booking.atmospherePreference === 'ambient') {
+    lines.push('🎵 *Атмосфера:* Мягкий эмбиент');
+  }
+
+  if (booking.guestComment) {
+    lines.push(`💬 *Пожелания:* ${booking.guestComment}`);
+  }
+
+  lines.push('━━━━━━━━━━━━━━━━━━━━');
+  const cleanPhone = booking.guestPhone.replace(/\D/g, '');
+  if (cleanPhone) {
+    lines.push(`📲 [Написать в WhatsApp](https://wa.me/${cleanPhone})`);
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Отправляет сообщение в Telegram через официальный Telegram Bot API
+ */
+export async function sendTelegramNotification(
+  text: string,
+  overrideSettings?: TelegramSettings
+): Promise<{ success: boolean; error?: string }> {
+  const settings = overrideSettings || getTelegramSettings();
+  if (!settings.enabled || !settings.botToken.trim() || !settings.chatId.trim()) {
+    return { success: false, error: 'Telegram-уведомления не настроены или отключены' };
+  }
+
+  try {
+    const token = settings.botToken.trim();
+    const chatId = settings.chatId.trim();
+    const url = `https://api.telegram.org/bot${token}/sendMessage`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        parse_mode: 'Markdown',
+        disable_web_page_preview: true,
+      }),
+    });
+
+    const data = await response.json();
+    if (data.ok) {
+      return { success: true };
+    }
+    return { success: false, error: data.description || 'Ошибка Telegram Bot API' };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Сетевая ошибка при отправке в Telegram';
+    return { success: false, error: message };
+  }
+}
+
+export async function sendTelegramBookingNotification(
+  booking: DemoBookingRecord
+): Promise<{ success: boolean; error?: string }> {
+  const text = formatTelegramBookingMessage(booking);
+  return sendTelegramNotification(text);
+}
+
+/**
+ * Генерирует прямую ссылку WhatsApp с вежливым текстом подтверждения
+ */
+export function getWhatsAppConfirmationUrl(booking: DemoBookingRecord): string {
+  const digits = booking.guestPhone.replace(/\D/g, '');
+  if (!digits) return '';
+
+  const message = `Здравствуйте, ${booking.guestName}! Вас приветствует студия массажа ÉLAN Wellness. Вы оставили заявку на запись:\n\n• Процедура: ${booking.serviceTitle}\n• Мастер: ${booking.specialistName}\n• Дата: ${booking.dateFormatted}, в ${booking.timeSlot}\n• Стоимость: ${booking.price.toLocaleString('ru-RU')} ₸\n\nПодтверждаем ваш визит? Если есть вопросы или особые пожелания, напишите нам!`;
+
+  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+}
+
+/**
+ * Авторизация в кабинете администратора (простой и удобный PIN-код, по умолчанию 1234)
+ */
+export const DEFAULT_ADMIN_PIN = '1234';
+
+export function getAdminAuthStatus(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return window.sessionStorage.getItem(ADMIN_AUTH_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+export function setAdminAuthStatus(authenticated: boolean): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (authenticated) {
+      window.sessionStorage.setItem(ADMIN_AUTH_KEY, 'true');
+    } else {
+      window.sessionStorage.removeItem(ADMIN_AUTH_KEY);
+    }
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * Воспроизводит мягкий и приятный перелив колокольчика (Web Audio API)
+ */
+export function playNewBookingChime(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtx) return;
+
+    const ctx = new AudioCtx();
+    const now = ctx.currentTime;
+
+    const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6 (мажорное арпеджио)
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+
+      gain.gain.setValueAtTime(0, now + idx * 0.08);
+      gain.gain.linearRampToValueAtTime(0.12, now + idx * 0.08 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.08 + 0.45);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now + idx * 0.08);
+      osc.stop(now + idx * 0.08 + 0.5);
+    });
+  } catch {
+    // Web Audio blocked or not supported
   }
 }

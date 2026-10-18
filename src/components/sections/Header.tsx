@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { CalendarCheck, Menu, ArrowUpRight } from 'lucide-react';
+import { CalendarCheck, Menu, ArrowUpRight, Shield } from 'lucide-react';
 import { BRAND_CONFIG } from '@/config/brand';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,13 +9,14 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import type { DemoBookingRecord } from '@/lib/booking';
+import { getNewBookingsCount, type DemoBookingRecord } from '@/lib/booking';
 import { cn } from '@/lib/utils';
 
 interface HeaderProps {
   onOpenBooking: () => void;
   sessionBookings: DemoBookingRecord[];
   onOpenSessionBookingsModal?: () => void;
+  onOpenAdminModal?: () => void;
 }
 
 const PRIMARY_NAV = [
@@ -30,9 +31,14 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenBooking,
   sessionBookings,
   onOpenSessionBookingsModal,
+  onOpenAdminModal,
 }) => {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const newBookingsCount = React.useMemo(
+    () => getNewBookingsCount(sessionBookings),
+    [sessionBookings]
+  );
 
   React.useEffect(() => {
     const onScroll = () => {
@@ -85,6 +91,21 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Действия справа */}
         <div className="hidden lg:flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onOpenAdminModal}
+            className="inline-flex items-center gap-1.5 rounded-full border border-[#E5E0D5] bg-[#FFFCF6] px-3.5 py-2 text-xs font-medium text-[#292A23] hover:border-[#667052] transition-colors cursor-pointer"
+            title="Личный кабинет администратора студии (PIN: 1234)"
+          >
+            <Shield className="h-3.5 w-3.5 text-[#667052]" />
+            <span>Кабинет студии</span>
+            {newBookingsCount > 0 && (
+              <span className="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-[#667052] text-[#FFFCF6] text-[10px] font-bold">
+                {newBookingsCount}
+              </span>
+            )}
+          </button>
+
           {sessionBookings.length > 0 && (
             <button
               type="button"
@@ -107,6 +128,21 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Мобильная кнопка меню + компактная запись */}
         <div className="flex lg:hidden items-center gap-2">
+          <button
+            type="button"
+            onClick={onOpenAdminModal}
+            aria-label="Кабинет студии"
+            className="inline-flex h-10 items-center gap-1.5 rounded-full border border-[#E5E0D5] bg-[#FFFCF6] px-2.5 text-xs font-medium text-[#292A23] cursor-pointer"
+            title="Кабинет администратора"
+          >
+            <Shield className="h-3.5 w-3.5 text-[#667052]" />
+            {newBookingsCount > 0 && (
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#667052] text-[#FFFCF6] text-[10px] font-bold">
+                {newBookingsCount}
+              </span>
+            )}
+          </button>
+
           {sessionBookings.length > 0 && (
             <button
               type="button"
@@ -159,6 +195,27 @@ export const Header: React.FC<HeaderProps> = ({
                       />
                     </a>
                   ))}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onOpenAdminModal?.();
+                    }}
+                    className="flex items-center justify-between py-3.5 font-serif text-xl text-[#292A23] transition-colors hover:text-[#667052] text-left cursor-pointer"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-[#667052]" />
+                      <span>Кабинет студии</span>
+                    </span>
+                    {newBookingsCount > 0 ? (
+                      <span className="rounded-full bg-[#667052] text-[#FFFCF6] px-2 py-0.5 text-xs font-bold">
+                        +{newBookingsCount}
+                      </span>
+                    ) : (
+                      <ArrowUpRight className="h-4 w-4 text-[#77776B]" />
+                    )}
+                  </button>
                 </nav>
               </div>
 

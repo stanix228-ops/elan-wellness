@@ -14,6 +14,7 @@ import { ContactsFooter } from '@/components/sections/ContactsFooter';
 import { BookingModal } from '@/components/booking/BookingModal';
 import { GiftCertificateModal } from '@/components/booking/GiftCertificateModal';
 import { LegalModal, type LegalDocType } from '@/components/booking/LegalModal';
+import { AdminModal } from '@/components/admin/AdminModal';
 import { studioConfig } from '@/config/studioConfig';
 import {
   Dialog,
@@ -44,6 +45,7 @@ export function App() {
   >(null);
 
   const [legalDocType, setLegalDocType] = React.useState<LegalDocType>(null);
+  const [adminModalOpen, setAdminModalOpen] = React.useState(false);
 
   const [sessionBookings, setSessionBookings] = React.useState<
     DemoBookingRecord[]
@@ -53,6 +55,18 @@ export function App() {
 
   const [showMobileFloatingCta, setShowMobileFloatingCta] =
     React.useState(false);
+
+  // Слушатель хэша #admin в адресной строке
+  React.useEffect(() => {
+    const handleHash = () => {
+      if (window.location.hash === '#admin') {
+        setAdminModalOpen(true);
+      }
+    };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -104,6 +118,7 @@ export function App() {
         onOpenBooking={handleOpenGeneralBooking}
         sessionBookings={sessionBookings}
         onOpenSessionBookingsModal={() => setSessionBookingsModalOpen(true)}
+        onOpenAdminModal={() => setAdminModalOpen(true)}
       />
 
       <main id="main-content" className="flex-1">
@@ -127,6 +142,7 @@ export function App() {
       <ContactsFooter
         onOpenBooking={handleOpenGeneralBooking}
         onOpenLegalModal={(type) => setLegalDocType(type)}
+        onOpenAdminModal={() => setAdminModalOpen(true)}
       />
 
       {/* Ненавязчивая мобильная фиксированная панель записи */}
@@ -222,19 +238,37 @@ export function App() {
             ))}
           </div>
 
-          <div className="flex justify-between pt-2">
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSessionBookingsModalOpen(false);
+                  handleOpenGeneralBooking();
+                }}
+                className="text-xs"
+              >
+                Создать новую запись
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSessionBookingsModalOpen(false);
+                  setAdminModalOpen(true);
+                }}
+                className="text-xs text-[#667052] hover:bg-[#667052]/10"
+              >
+                Кабинет студии (CRM)
+              </Button>
+            </div>
+
             <Button
               type="button"
-              variant="outline"
-              onClick={() => {
-                setSessionBookingsModalOpen(false);
-                handleOpenGeneralBooking();
-              }}
-            >
-              Создать новую запись
-            </Button>
-            <Button
-              type="button"
+              size="sm"
               onClick={() => setSessionBookingsModalOpen(false)}
             >
               Закрыть
@@ -242,6 +276,13 @@ export function App() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Личный кабинет администратора студии (CRM, Telegram-оповещения, WhatsApp) */}
+      <AdminModal
+        open={adminModalOpen}
+        onOpenChange={setAdminModalOpen}
+        onBookingsUpdated={handleBookingCreated}
+      />
     </div>
   );
 }

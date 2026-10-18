@@ -1,5 +1,6 @@
 import { SERVICES_CATALOG, type WellnessService } from '@/config/services';
 import { SPECIALISTS_CATALOG, type SpecialistProfile } from '@/config/specialists';
+import { getServicesCatalog, getSpecialistsCatalog } from '@/lib/catalogStore';
 
 export interface TimeSlot {
   time: string;
@@ -119,7 +120,7 @@ export function generateDemoTimeSlots(params: {
 
   // Если выбран конкретный мастер, проверяем его демонстрационные рабочие дни
   if (specialistId !== 'any') {
-    const specialist = SPECIALISTS_CATALOG.find((s) => s.id === specialistId);
+    const specialist = getSpecialistsCatalog().find((s) => s.id === specialistId);
     if (specialist && !specialist.workingDays.includes(dayOfWeek)) {
       return {
         slots: [],
@@ -192,12 +193,13 @@ export function generateDemoTimeSlots(params: {
 }
 
 export function getSpecialistsForService(serviceId: string): SpecialistProfile[] {
-  if (!serviceId) return SPECIALISTS_CATALOG;
-  return SPECIALISTS_CATALOG.filter((sp) => sp.serviceIds.includes(serviceId));
+  const all = getSpecialistsCatalog();
+  if (!serviceId) return all;
+  return all.filter((sp) => sp.serviceIds.includes(serviceId));
 }
 
 export function getServiceById(serviceId: string): WellnessService | undefined {
-  return SERVICES_CATALOG.find((s) => s.id === serviceId);
+  return getServicesCatalog().find((s) => s.id === serviceId);
 }
 
 export function formatRussianPhoneInput(raw: string): string {

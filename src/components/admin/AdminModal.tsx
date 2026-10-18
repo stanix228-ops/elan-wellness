@@ -6,8 +6,10 @@ import {
   CheckCircle2,
   Clock,
   Download,
+  Edit3,
   ExternalLink,
   Filter,
+  Image as ImageIcon,
   KeyRound,
   Lock,
   LogOut,
@@ -15,11 +17,14 @@ import {
   Phone,
   Plus,
   RefreshCw,
+  RotateCcw,
   Search,
   Send,
   Shield,
+  Sparkles,
   Trash2,
   User,
+  Users,
   X,
 } from 'lucide-react';
 import {
@@ -31,8 +36,6 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { SERVICES_CATALOG } from '@/config/services';
-import { SPECIALISTS_CATALOG } from '@/config/specialists';
 import { studioConfig } from '@/config/studioConfig';
 import {
   clearAllBookings,
@@ -55,6 +58,13 @@ import {
   type DemoBookingRecord,
   type TelegramSettings,
 } from '@/lib/booking';
+import {
+  useStudioCatalog,
+  PRESET_SERVICE_IMAGES,
+  PRESET_SPECIALIST_IMAGES,
+  type WellnessService,
+  type SpecialistProfile,
+} from '@/lib/catalogStore';
 import { cn, formatPrice } from '@/lib/utils';
 
 interface AdminModalProps {
@@ -63,13 +73,51 @@ interface AdminModalProps {
   onBookingsUpdated?: () => void;
 }
 
-type AdminTab = 'bookings' | 'telegram' | 'new-booking' | 'settings';
+type AdminTab =
+  | 'bookings'
+  | 'services'
+  | 'specialists'
+  | 'telegram'
+  | 'new-booking'
+  | 'settings';
+
+const DAYS_OF_WEEK = [
+  { day: 1, label: 'Пн' },
+  { day: 2, label: 'Вт' },
+  { day: 3, label: 'Ср' },
+  { day: 4, label: 'Чт' },
+  { day: 5, label: 'Пт' },
+  { day: 6, label: 'Сб' },
+  { day: 0, label: 'Вс' },
+];
+
+const SERVICE_CATEGORY_OPTIONS: Array<{
+  id: 'classic' | 'relax' | 'recovery' | 'rituals';
+  label: string;
+}> = [
+  { id: 'classic', label: 'Классический массаж' },
+  { id: 'relax', label: 'Расслабление и релакс' },
+  { id: 'recovery', label: 'Восстановление мышц' },
+  { id: 'rituals', label: 'Авторские спа-ритуалы' },
+];
 
 export const AdminModal: React.FC<AdminModalProps> = ({
   open,
   onOpenChange,
   onBookingsUpdated,
 }) => {
+  // Живой каталог услуг и мастеров
+  const {
+    services,
+    specialists,
+    saveService: saveCatalogService,
+    removeService: removeCatalogService,
+    restoreServices: restoreCatalogServices,
+    saveSpecialist: saveCatalogSpecialist,
+    removeSpecialist: removeCatalogSpecialist,
+    restoreSpecialists: restoreCatalogSpecialists,
+  } = useStudioCatalog();
+
   // Авторизация по PIN-коду (по умолчанию 1234)
   const [isAuthenticated, setIsAuthenticated] = React.useState<boolean>(() =>
     getAdminAuthStatus()
@@ -99,7 +147,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   // Форма ручного добавления записи
   const [manualServiceId, setManualServiceId] = React.useState(
-    SERVICES_CATALOG[0].id
+    () => services[0]?.id || 'classic-massage'
   );
   const [manualSpecialistId, setManualSpecialistId] = React.useState('any');
   const [manualDateIso, setManualDateIso] = React.useState(() =>
@@ -113,6 +161,22 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     null
   );
 
+  // Состояния редактирования УСЛУГ
+  const [editingService, setEditingService] =
+    React.useState<WellnessService | null>(null);
+  const [isServiceFormOpen, setIsServiceFormOpen] = React.useState(false);
+  const [serviceFeedback, setServiceFeedback] = React.useState<string | null>(
+    null
+  );
+
+  // Состояния редактирования МАСТЕРОВ
+  const [editingSpecialist, setEditingSpecialist] =
+    React.useState<SpecialistProfile | null>(null);
+  const [isSpecialistFormOpen, setIsSpecialistFormOpen] = React.useState(false);
+  const [specialistFeedback, setSpecialistFeedback] = React.useState<
+    string | null
+  >(null);
+
   // Перезагрузка списка при открытии
   React.useEffect(() => {
     if (open) {
@@ -120,6 +184,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       setTgSettings(getTelegramSettings());
       setTgTestResult(null);
       setManualSuccessMsg(null);
+      setServiceFeedback(null);
+      setSpecialistFeedback(null);
       setIsAuthenticated(getAdminAuthStatus());
     }
   }, [open]);
@@ -151,7 +217,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     onBookingsUpdated?.();
   };
 
-  const handleDelete = (referenceCode: string) => {
+  const handleDeleteBooking = (referenceCode: string) => {
     if (window.confirm(`Удалить запись ${referenceCode} из журнала?`)) {
       const updated = deleteBooking(referenceCode);
       setBookings(updated);
@@ -199,11 +265,12 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       return;
     }
 
-    const srv = SERVICES_CATALOG.find((s) => s.id === manualServiceId) || SERVICES_CATALOG[0];
+    const srv =
+      services.find((s) => s.id === manualServiceId) || services[0];
     const spec =
       manualSpecialistId === 'any'
         ? { name: 'Любой доступный мастер' }
-        : SPECIALISTS_CATALOG.find((s) => s.id === manualSpecialistId) || {
+        : specialists.find((s) => s.id === manualSpecialistId) || {
             name: 'Мастер студии',
           };
 
@@ -294,15 +361,30 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   };
 
   const handleSeedDemoBookings = () => {
+    const srv1 = services[0] || {
+      id: 'classic-massage',
+      title: 'Классический массаж',
+      durationMinutes: 60,
+      price: 8000,
+    };
+    const srv2 = services[1] || {
+      id: 'relax-massage',
+      title: 'Расслабляющий массаж',
+      durationMinutes: 75,
+      price: 9000,
+    };
+    const spec1 = specialists[0] || { id: 'anna-petrova', name: 'Анна Петрова' };
+    const spec2 = specialists[1] || { id: 'mikhail-volkov', name: 'Михаил Волков' };
+
     const demo1: DemoBookingRecord = {
       referenceCode: '#ELAN9120',
       createdAtIso: new Date(Date.now() - 3600000 * 2).toISOString(),
-      serviceId: 'classic-massage',
-      serviceTitle: 'Классический восстанавливающий массаж',
-      durationMinutes: 60,
-      price: 8000,
-      specialistId: 'anna-petrova',
-      specialistName: 'Анна Петрова',
+      serviceId: srv1.id,
+      serviceTitle: srv1.title,
+      durationMinutes: srv1.durationMinutes,
+      price: srv1.price,
+      specialistId: spec1.id,
+      specialistName: spec1.name,
       dateIso: toLocalIsoDate(new Date()),
       dateFormatted: formatHumanDate(toLocalIsoDate(new Date())),
       timeSlot: '15:00',
@@ -317,12 +399,12 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     const demo2: DemoBookingRecord = {
       referenceCode: '#ELAN7841',
       createdAtIso: new Date(Date.now() - 3600000 * 5).toISOString(),
-      serviceId: 'deep-tissue',
-      serviceTitle: 'Глубокотканный массаж (Deep Tissue)',
-      durationMinutes: 60,
-      price: 9500,
-      specialistId: 'mikhail-volkov',
-      specialistName: 'Михаил Волков',
+      serviceId: srv2.id,
+      serviceTitle: srv2.title,
+      durationMinutes: srv2.durationMinutes,
+      price: srv2.price,
+      specialistId: spec2.id,
+      specialistName: spec2.name,
       dateIso: toLocalIsoDate(new Date(Date.now() + 86400000)),
       dateFormatted: formatHumanDate(toLocalIsoDate(new Date(Date.now() + 86400000))),
       timeSlot: '17:00',
@@ -334,10 +416,172 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       isDemoOnly: true,
     };
 
-    const updated = saveSessionDemoBooking(demo1);
+    saveSessionDemoBooking(demo1);
     const final = saveSessionDemoBooking(demo2);
     setBookings(final);
     onBookingsUpdated?.();
+  };
+
+  // ================= УПРАВЛЕНИЕ УСЛУГАМИ =================
+
+  const handleAddNewService = () => {
+    const id = 'service-' + Date.now();
+    setEditingService({
+      id,
+      code: 'SRV' + Math.floor(100 + Math.random() * 900),
+      title: '',
+      subtitle: 'Восстановление баланса и глубокое расслабление мышц',
+      category: 'relax',
+      categoryLabel: 'Расслабление',
+      durationMinutes: 60,
+      price: 9000,
+      description:
+        'Индивидуальный ритуал для снятия мышечных спазмов, улучшения кровообращения и глубокого психоэмоционального отдыха.',
+      sensoryNotes: ['льняные полотенца', 'масло жожоба', 'тишина'],
+      intensity: 'Средняя',
+      image: PRESET_SERVICE_IMAGES[0].url,
+      imageAlt: 'Массаж студии',
+      featuredNote: 'Новинка',
+    });
+    setIsServiceFormOpen(true);
+  };
+
+  const handleEditService = (srv: WellnessService) => {
+    setEditingService({ ...srv });
+    setIsServiceFormOpen(true);
+  };
+
+  const handleSaveService = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingService || !editingService.title.trim()) {
+      alert('Пожалуйста, укажите название услуги.');
+      return;
+    }
+    saveCatalogService(editingService);
+    setServiceFeedback(`Услуга «${editingService.title}» успешно сохранена!`);
+    setIsServiceFormOpen(false);
+    setTimeout(() => setServiceFeedback(null), 3500);
+  };
+
+  const handleDeleteService = (id: string, title: string) => {
+    if (services.length <= 1) {
+      alert('В каталоге должна оставаться хотя бы одна услуга.');
+      return;
+    }
+    if (window.confirm(`Удалить услугу «${title}» из каталога студии?`)) {
+      removeCatalogService(id);
+      setServiceFeedback(`Услуга «${title}» удалена из каталога.`);
+      setTimeout(() => setServiceFeedback(null), 3500);
+    }
+  };
+
+  const handleRestoreServices = () => {
+    if (
+      window.confirm(
+        'Сбросить все услуги и цены к исходному базовому каталогу студии?'
+      )
+    ) {
+      restoreCatalogServices();
+      setServiceFeedback('Каталог услуг возвращён к исходным настройкам.');
+      setTimeout(() => setServiceFeedback(null), 3500);
+    }
+  };
+
+  // ================= УПРАВЛЕНИЕ МАСТЕРАМИ =================
+
+  const handleAddNewSpecialist = () => {
+    const id = 'specialist-' + Date.now();
+    setEditingSpecialist({
+      id,
+      name: '',
+      role: 'Массажист-терапевт',
+      experienceYears: '4 года опыта',
+      approach:
+        'Бережное внимание к анатомическим особенностям гостя и мягкое погружение в комфорт.',
+      quote: 'Тишина и правильное прикосновение лечат быстрее любых слов.',
+      specialties: ['Расслабляющий массаж', 'Классические техники'],
+      serviceIds: services.map((s) => s.id),
+      workingDays: [1, 2, 3, 4, 5], // Пн-Пт
+      image: PRESET_SPECIALIST_IMAGES[0].url,
+      imageAlt: 'Мастер студии',
+    });
+    setIsSpecialistFormOpen(true);
+  };
+
+  const handleEditSpecialist = (sp: SpecialistProfile) => {
+    setEditingSpecialist({
+      ...sp,
+      workingDays: [...sp.workingDays],
+      serviceIds: [...sp.serviceIds],
+      specialties: [...sp.specialties],
+    });
+    setIsSpecialistFormOpen(true);
+  };
+
+  const handleToggleSpecialistDay = (day: number) => {
+    if (!editingSpecialist) return;
+    const exists = editingSpecialist.workingDays.includes(day);
+    const updated = exists
+      ? editingSpecialist.workingDays.filter((d) => d !== day)
+      : [...editingSpecialist.workingDays, day];
+
+    setEditingSpecialist({
+      ...editingSpecialist,
+      workingDays: updated,
+    });
+  };
+
+  const handleToggleSpecialistService = (srvId: string) => {
+    if (!editingSpecialist) return;
+    const exists = editingSpecialist.serviceIds.includes(srvId);
+    const updated = exists
+      ? editingSpecialist.serviceIds.filter((id) => id !== srvId)
+      : [...editingSpecialist.serviceIds, srvId];
+
+    setEditingSpecialist({
+      ...editingSpecialist,
+      serviceIds: updated,
+    });
+  };
+
+  const handleSaveSpecialist = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingSpecialist || !editingSpecialist.name.trim()) {
+      alert('Пожалуйста, укажите имя мастера.');
+      return;
+    }
+    if (editingSpecialist.workingDays.length === 0) {
+      alert('Выберите хотя бы один рабочий день для мастера.');
+      return;
+    }
+    saveCatalogSpecialist(editingSpecialist);
+    setSpecialistFeedback(`Мастер «${editingSpecialist.name}» успешно сохранён!`);
+    setIsSpecialistFormOpen(false);
+    setTimeout(() => setSpecialistFeedback(null), 3500);
+  };
+
+  const handleDeleteSpecialist = (id: string, name: string) => {
+    if (specialists.length <= 1) {
+      alert('В студии должен оставаться хотя бы один специалист.');
+      return;
+    }
+    if (window.confirm(`Удалить профиль мастера «${name}»?`)) {
+      removeCatalogSpecialist(id);
+      setSpecialistFeedback(`Мастер «${name}» удалён.`);
+      setTimeout(() => setSpecialistFeedback(null), 3500);
+    }
+  };
+
+  const handleRestoreSpecialists = () => {
+    if (
+      window.confirm(
+        'Сбросить список специалистов студии к базовой команде?'
+      )
+    ) {
+      restoreCatalogSpecialists();
+      setSpecialistFeedback('Список специалистов возвращён к исходному.');
+      setTimeout(() => setSpecialistFeedback(null), 3500);
+    }
   };
 
   // Фильтрация записей
@@ -384,13 +628,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({
             <DialogHeader className="text-center sm:text-center pr-0 space-y-2">
               <div className="inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.2em] font-semibold text-[#667052]">
                 <Shield className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>ÉLAN CRM & Студия</span>
+                <span>ÉLAN CRM & Управление студией</span>
               </div>
               <DialogTitle className="font-serif text-3xl font-medium text-[#292A23]">
                 Кабинет администратора
               </DialogTitle>
               <DialogDescription className="text-sm text-[#5E5E53]">
-                Доступ к журналу онлайн-записей, связке с WhatsApp и настройке моментальных уведомлений в Telegram.
+                Управление журналом бронирований, редактирование услуг, цен и мастеров студии, настройка Telegram-оповещений.
               </DialogDescription>
             </DialogHeader>
 
@@ -461,7 +705,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     )}
                   </div>
                   <DialogTitle className="mt-0.5 font-serif text-2xl font-medium text-[#292A23]">
-                    Журнал записей и уведомления
+                    Управление студией
                   </DialogTitle>
                 </div>
 
@@ -480,19 +724,19 @@ export const AdminModal: React.FC<AdminModalProps> = ({
               </div>
 
               {/* МЕНЮ ВКЛАДОК */}
-              <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-[#E5E0D5]">
+              <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-[#E5E0D5] overflow-x-auto">
                 <button
                   type="button"
                   onClick={() => setActiveTab('bookings')}
                   className={cn(
-                    'inline-flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer',
+                    'inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer shrink-0',
                     activeTab === 'bookings'
                       ? 'bg-[#667052] text-[#FFFCF6]'
                       : 'text-[#5E5E53] hover:bg-[#F7F4ED]'
                   )}
                 >
                   <Calendar className="h-3.5 w-3.5" />
-                  <span>Записи студии ({bookings.length})</span>
+                  <span>Заявки ({bookings.length})</span>
                   {stats.newCount > 0 && (
                     <span className="flex h-2 w-2 rounded-full bg-[#C6B99F]" />
                   )}
@@ -500,18 +744,46 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
                 <button
                   type="button"
+                  onClick={() => setActiveTab('services')}
+                  className={cn(
+                    'inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer shrink-0',
+                    activeTab === 'services'
+                      ? 'bg-[#667052] text-[#FFFCF6]'
+                      : 'text-[#5E5E53] hover:bg-[#F7F4ED]'
+                  )}
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span>Услуги и цены ({services.length})</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('specialists')}
+                  className={cn(
+                    'inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer shrink-0',
+                    activeTab === 'specialists'
+                      ? 'bg-[#667052] text-[#FFFCF6]'
+                      : 'text-[#5E5E53] hover:bg-[#F7F4ED]'
+                  )}
+                >
+                  <Users className="h-3.5 w-3.5" />
+                  <span>Мастера ({specialists.length})</span>
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => setActiveTab('telegram')}
                   className={cn(
-                    'inline-flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer',
+                    'inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer shrink-0',
                     activeTab === 'telegram'
                       ? 'bg-[#667052] text-[#FFFCF6]'
                       : 'text-[#5E5E53] hover:bg-[#F7F4ED]'
                   )}
                 >
                   <Send className="h-3.5 w-3.5" />
-                  <span>Уведомления в Telegram</span>
+                  <span>Telegram</span>
                   {tgSettings.enabled && (
-                    <span className="rounded-full bg-emerald-500/20 text-emerald-700 px-1.5 text-[9px] font-bold">
+                    <span className="rounded-full bg-emerald-500/20 text-emerald-700 px-1 text-[9px] font-bold">
                       Вкл
                     </span>
                   )}
@@ -521,28 +793,28 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   type="button"
                   onClick={() => setActiveTab('new-booking')}
                   className={cn(
-                    'inline-flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer',
+                    'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer shrink-0',
                     activeTab === 'new-booking'
                       ? 'bg-[#667052] text-[#FFFCF6]'
                       : 'text-[#5E5E53] hover:bg-[#F7F4ED]'
                   )}
                 >
                   <Plus className="h-3.5 w-3.5" />
-                  <span>+ Записать вручную</span>
+                  <span>Записать вручную</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setActiveTab('settings')}
                   className={cn(
-                    'inline-flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer',
+                    'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer shrink-0',
                     activeTab === 'settings'
                       ? 'bg-[#667052] text-[#FFFCF6]'
                       : 'text-[#5E5E53] hover:bg-[#F7F4ED]'
                   )}
                 >
                   <RefreshCw className="h-3.5 w-3.5" />
-                  <span>Данные и экспорт</span>
+                  <span>Экспорт</span>
                 </button>
               </div>
             </div>
@@ -593,7 +865,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
                   {/* Фильтры и поиск */}
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
-                    {/* Кнопки статуса */}
                     <div className="flex flex-wrap items-center gap-1.5 text-xs">
                       {[
                         { id: 'all', label: `Все (${stats.total})` },
@@ -623,7 +894,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       ))}
                     </div>
 
-                    {/* Поиск */}
                     <div className="relative min-w-[220px]">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#77776B]" />
                       <Input
@@ -680,7 +950,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                                 : 'border-[#E5E0D5] bg-[#F7F4ED]/80 opacity-90'
                             )}
                           >
-                            {/* Верхняя строка карточки */}
                             <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-[#E5E0D5]">
                               <div className="flex items-center gap-2">
                                 <span className="font-mono text-sm font-bold text-[#667052]">
@@ -691,7 +960,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                                 </span>
                               </div>
 
-                              {/* Бейдж статуса */}
                               <div className="flex items-center gap-1.5">
                                 <span
                                   className={cn(
@@ -714,9 +982,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                               </div>
                             </div>
 
-                            {/* Информация о визите и госте */}
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-3 text-xs sm:text-sm">
-                              {/* Услуга и время */}
                               <div className="md:col-span-7 space-y-1.5">
                                 <p className="font-serif text-lg font-medium text-[#292A23]">
                                   {b.serviceTitle}{' '}
@@ -739,7 +1005,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                                 )}
                               </div>
 
-                              {/* Гость и стоимость */}
                               <div className="md:col-span-5 space-y-1.5 md:border-l md:border-[#E5E0D5] md:pl-4">
                                 <div className="flex items-center justify-between">
                                   <span className="text-xs text-[#77776B]">Гость</span>
@@ -756,9 +1021,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                               </div>
                             </div>
 
-                            {/* Панель действий: WhatsApp, звонок, смена статуса */}
                             <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#E5E0D5]">
-                              {/* Связь с клиентом */}
                               <div className="flex flex-wrap items-center gap-2">
                                 <a
                                   href={waUrl}
@@ -779,7 +1042,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                                 </a>
                               </div>
 
-                              {/* Статусные кнопки */}
                               <div className="flex items-center gap-1.5">
                                 {status !== 'confirmed' && (
                                   <Button
@@ -827,7 +1089,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                                   type="button"
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => handleDelete(b.referenceCode)}
+                                  onClick={() => handleDeleteBooking(b.referenceCode)}
                                   className="h-8 w-8 p-0 text-[#77776B] hover:text-[#B44C3E]"
                                   title="Удалить запись"
                                 >
@@ -843,7 +1105,736 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                 </div>
               )}
 
-              {/* ================= ВКЛАДКА 2: НАСТРОЙКА TELEGRAM ================= */}
+              {/* ================= ВКЛАДКА 2: УСЛУГИ И ЦЕНЫ ================= */}
+              {activeTab === 'services' && (
+                <div className="space-y-4">
+                  {/* Верхняя плашка действий */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl border border-[#E5E0D5] bg-[#FFFCF6]">
+                    <div>
+                      <h3 className="font-serif text-lg font-medium text-[#292A23]">
+                        Каталог процедур и стоимость
+                      </h3>
+                      <p className="text-xs text-[#5E5E53]">
+                        Все изменения сразу обновляют главную страницу и форму онлайн-записи.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={handleAddNewService}
+                        className="bg-[#667052] hover:bg-[#4F5B3E] text-[#FFFCF6] text-xs gap-1.5"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                        <span>Добавить услугу</span>
+                      </Button>
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleRestoreServices}
+                        className="text-xs gap-1.5 text-[#77776B]"
+                        title="Сбросить все услуги к базовым настройкам"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        <span>Сброс</span>
+                      </Button>
+                    </div>
+                  </div>
+
+                  {serviceFeedback && (
+                    <div className="p-3 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-medium">
+                      {serviceFeedback}
+                    </div>
+                  )}
+
+                  {/* ФОРМА РЕДАКТИРОВАНИЯ / ДОБАВЛЕНИЯ УСЛУГИ */}
+                  {isServiceFormOpen && editingService && (
+                    <form
+                      onSubmit={handleSaveService}
+                      className="rounded-2xl border-2 border-[#667052]/50 bg-[#FFFCF6] p-5 sm:p-6 space-y-4 shadow-md animate-fade-up"
+                    >
+                      <div className="flex items-center justify-between border-b border-[#E5E0D5] pb-3">
+                        <span className="font-serif text-xl font-medium text-[#292A23]">
+                          {editingService.title
+                            ? `Редактирование: ${editingService.title}`
+                            : 'Новая услуга'}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setIsServiceFormOpen(false)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                        <div className="space-y-1.5">
+                          <label className="font-semibold text-[#292A23]">
+                            Название процедуры *
+                          </label>
+                          <Input
+                            placeholder="Например: Лимфодренажный детокс-массаж"
+                            value={editingService.title}
+                            onChange={(e) =>
+                              setEditingService({
+                                ...editingService,
+                                title: e.target.value,
+                              })
+                            }
+                            className="h-10 text-xs"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="font-semibold text-[#292A23]">
+                            Категория *
+                          </label>
+                          <select
+                            value={editingService.category}
+                            onChange={(e) => {
+                              const cat = e.target.value as any;
+                              const label =
+                                SERVICE_CATEGORY_OPTIONS.find((c) => c.id === cat)
+                                  ?.label || 'Массаж';
+                              setEditingService({
+                                ...editingService,
+                                category: cat,
+                                categoryLabel: label,
+                              });
+                            }}
+                            className="w-full h-10 rounded-xl border border-[#E5E0D5] bg-[#FFFCF6] px-3 text-xs text-[#292A23] focus:ring-1 focus:ring-[#667052]"
+                          >
+                            {SERVICE_CATEGORY_OPTIONS.map((c) => (
+                              <option key={c.id} value={c.id}>
+                                {c.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="font-semibold text-[#292A23]">
+                            Цена (в тенге, ₸) *
+                          </label>
+                          <Input
+                            type="number"
+                            min={1000}
+                            step={500}
+                            placeholder="9000"
+                            value={editingService.price}
+                            onChange={(e) =>
+                              setEditingService({
+                                ...editingService,
+                                price: Number(e.target.value) || 0,
+                              })
+                            }
+                            className="h-10 text-xs font-mono"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="font-semibold text-[#292A23]">
+                            Длительность (в минутах) *
+                          </label>
+                          <Input
+                            type="number"
+                            min={15}
+                            step={5}
+                            placeholder="60"
+                            value={editingService.durationMinutes}
+                            onChange={(e) =>
+                              setEditingService({
+                                ...editingService,
+                                durationMinutes: Number(e.target.value) || 60,
+                              })
+                            }
+                            className="h-10 text-xs font-mono"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="font-semibold text-[#292A23]">
+                            Интенсивность нажима
+                          </label>
+                          <select
+                            value={editingService.intensity}
+                            onChange={(e) =>
+                              setEditingService({
+                                ...editingService,
+                                intensity: e.target.value as any,
+                              })
+                            }
+                            className="w-full h-10 rounded-xl border border-[#E5E0D5] bg-[#FFFCF6] px-3 text-xs text-[#292A23]"
+                          >
+                            <option value="Мягкая">Мягкая</option>
+                            <option value="Средняя">Средняя</option>
+                            <option value="Глубокая">Глубокая</option>
+                            <option value="Адаптивная">Адаптивная</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="font-semibold text-[#292A23]">
+                            Особая метка (бейдж)
+                          </label>
+                          <Input
+                            placeholder="Например: Выбор гостей / Новинка"
+                            value={editingService.featuredNote || ''}
+                            onChange={(e) =>
+                              setEditingService({
+                                ...editingService,
+                                featuredNote: e.target.value,
+                              })
+                            }
+                            className="h-10 text-xs"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5 text-xs">
+                        <label className="font-semibold text-[#292A23]">
+                          Краткое описание процедуры
+                        </label>
+                        <textarea
+                          rows={2}
+                          placeholder="Опишите технику, результат и кому подходит процедура..."
+                          value={editingService.description}
+                          onChange={(e) =>
+                            setEditingService({
+                              ...editingService,
+                              description: e.target.value,
+                            })
+                          }
+                          className="w-full rounded-xl border border-[#E5E0D5] bg-[#FFFCF6] p-3 text-xs text-[#292A23] focus:ring-1 focus:ring-[#667052]"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5 text-xs">
+                        <label className="font-semibold text-[#292A23]">
+                          Сенсорные детали (через запятую)
+                        </label>
+                        <Input
+                          placeholder="льняные простыни, подогретые полотенца, масло миндаля"
+                          value={editingService.sensoryNotes.join(', ')}
+                          onChange={(e) =>
+                            setEditingService({
+                              ...editingService,
+                              sensoryNotes: e.target.value
+                                .split(',')
+                                .map((s) => s.trim())
+                                .filter(Boolean),
+                            })
+                          }
+                          className="h-10 text-xs"
+                        />
+                      </div>
+
+                      {/* ВЫБОР ФОТОГРАФИИ ДЛЯ УСЛУГИ */}
+                      <div className="space-y-2 pt-1 border-t border-[#E5E0D5] text-xs">
+                        <label className="font-semibold text-[#292A23]">
+                          Фотография процедуры (выберите готовый пресет студии или укажите URL)
+                        </label>
+                        <Input
+                          placeholder="https://images.unsplash.com/..."
+                          value={editingService.image}
+                          onChange={(e) =>
+                            setEditingService({
+                              ...editingService,
+                              image: e.target.value,
+                            })
+                          }
+                          className="h-10 text-xs font-mono"
+                        />
+
+                        {/* Быстрые пресеты фото */}
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
+                          <span className="text-[11px] text-[#77776B]">Пресеты студии:</span>
+                          {PRESET_SERVICE_IMAGES.map((preset, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() =>
+                                setEditingService({
+                                  ...editingService,
+                                  image: preset.url,
+                                })
+                              }
+                              className={cn(
+                                'h-9 px-2.5 rounded-lg border text-[11px] transition-all flex items-center gap-1.5 cursor-pointer',
+                                editingService.image === preset.url
+                                  ? 'border-[#667052] bg-[#667052]/10 font-medium text-[#4F5B3E]'
+                                  : 'border-[#E5E0D5] bg-[#FFFCF6] text-[#5E5E53] hover:border-[#C6B99F]'
+                              )}
+                              title={preset.label}
+                            >
+                              <img
+                                src={preset.url}
+                                alt="Пресет"
+                                className="h-5 w-5 rounded object-cover"
+                              />
+                              <span>Вариант {idx + 1}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E5E0D5]">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setIsServiceFormOpen(false)}
+                          className="text-xs"
+                        >
+                          Отмена
+                        </Button>
+                        <Button
+                          type="submit"
+                          className="bg-[#667052] hover:bg-[#4F5B3E] text-[#FFFCF6] text-xs font-semibold px-6"
+                        >
+                          Сохранить услугу
+                        </Button>
+                      </div>
+                    </form>
+                  )}
+
+                  {/* СПИСОК УСЛУГ */}
+                  <div className="grid grid-cols-1 gap-3">
+                    {services.map((srv) => (
+                      <div
+                        key={srv.id}
+                        className="rounded-2xl border border-[#E5E0D5] bg-[#FFFCF6] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all hover:border-[#C6B99F] shadow-xs"
+                      >
+                        <div className="flex items-center gap-3.5 min-w-0">
+                          <img
+                            src={srv.image}
+                            alt={srv.title}
+                            className="h-16 w-16 sm:h-20 sm:w-20 rounded-xl object-cover shrink-0 border border-[#E5E0D5]"
+                          />
+                          <div className="min-w-0 space-y-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h4 className="font-serif text-lg font-medium text-[#292A23] truncate">
+                                {srv.title}
+                              </h4>
+                              {srv.featuredNote && (
+                                <span className="rounded-full bg-[#EFECE4] border border-[#C6B99F]/60 px-2 py-0.5 text-[10px] text-[#5E5E53]">
+                                  {srv.featuredNote}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2.5 text-xs text-[#77776B]">
+                              <span className="font-semibold text-[#667052]">
+                                {formatPrice(srv.price)}
+                              </span>
+                              <span>•</span>
+                              <span>{srv.durationMinutes} мин</span>
+                              <span>•</span>
+                              <span>{srv.categoryLabel}</span>
+                              <span>•</span>
+                              <span>{srv.intensity}</span>
+                            </div>
+                            <p className="text-xs text-[#5E5E53] line-clamp-1 max-w-xl">
+                              {srv.description}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditService(srv)}
+                            className="h-9 px-3 text-xs gap-1.5"
+                          >
+                            <Edit3 className="h-3.5 w-3.5 text-[#667052]" />
+                            <span>Изменить</span>
+                          </Button>
+
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteService(srv.id, srv.title)}
+                            className="h-9 w-9 p-0 text-[#77776B] hover:text-[#B44C3E]"
+                            title="Удалить услугу"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ================= ВКЛАДКА 3: МАСТЕРА СТУДИИ ================= */}
+              {activeTab === 'specialists' && (
+                <div className="space-y-4">
+                  {/* Верхняя плашка действий */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl border border-[#E5E0D5] bg-[#FFFCF6]">
+                    <div>
+                      <h3 className="font-serif text-lg font-medium text-[#292A23]">
+                        Команда специалистов студии
+                      </h3>
+                      <p className="text-xs text-[#5E5E53]">
+                        Редактируйте имена мастеров, специализацию, рабочие дни недели и фото.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={handleAddNewSpecialist}
+                        className="bg-[#667052] hover:bg-[#4F5B3E] text-[#FFFCF6] text-xs gap-1.5"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                        <span>Добавить мастера</span>
+                      </Button>
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleRestoreSpecialists}
+                        className="text-xs gap-1.5 text-[#77776B]"
+                        title="Сбросить всех мастеров к базовым настройкам"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        <span>Сброс</span>
+                      </Button>
+                    </div>
+                  </div>
+
+                  {specialistFeedback && (
+                    <div className="p-3 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-medium">
+                      {specialistFeedback}
+                    </div>
+                  )}
+
+                  {/* ФОРМА РЕДАКТИРОВАНИЯ / ДОБАВЛЕНИЯ МАСТЕРА */}
+                  {isSpecialistFormOpen && editingSpecialist && (
+                    <form
+                      onSubmit={handleSaveSpecialist}
+                      className="rounded-2xl border-2 border-[#667052]/50 bg-[#FFFCF6] p-5 sm:p-6 space-y-4 shadow-md animate-fade-up"
+                    >
+                      <div className="flex items-center justify-between border-b border-[#E5E0D5] pb-3">
+                        <span className="font-serif text-xl font-medium text-[#292A23]">
+                          {editingSpecialist.name
+                            ? `Редактирование: ${editingSpecialist.name}`
+                            : 'Новый специалист'}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setIsSpecialistFormOpen(false)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                        <div className="space-y-1.5">
+                          <label className="font-semibold text-[#292A23]">
+                            Имя и фамилия мастера *
+                          </label>
+                          <Input
+                            placeholder="Например: Анна Петрова"
+                            value={editingSpecialist.name}
+                            onChange={(e) =>
+                              setEditingSpecialist({
+                                ...editingSpecialist,
+                                name: e.target.value,
+                              })
+                            }
+                            className="h-10 text-xs"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="font-semibold text-[#292A23]">
+                            Должность / специализация *
+                          </label>
+                          <Input
+                            placeholder="Массажист-терапевт"
+                            value={editingSpecialist.role}
+                            onChange={(e) =>
+                              setEditingSpecialist({
+                                ...editingSpecialist,
+                                role: e.target.value,
+                              })
+                            }
+                            className="h-10 text-xs"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="font-semibold text-[#292A23]">
+                            Опыт работы *
+                          </label>
+                          <Input
+                            placeholder="5 лет опыта"
+                            value={editingSpecialist.experienceYears}
+                            onChange={(e) =>
+                              setEditingSpecialist({
+                                ...editingSpecialist,
+                                experienceYears: e.target.value,
+                              })
+                            }
+                            className="h-10 text-xs"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      {/* ВЫБОР РАБОЧИХ ДНЕЙ (ПН-ВС) */}
+                      <div className="space-y-2 text-xs">
+                        <label className="font-semibold text-[#292A23]">
+                          Рабочие дни недели (влияет на доступные даты в онлайн-записи)
+                        </label>
+                        <div className="flex flex-wrap items-center gap-2">
+                          {DAYS_OF_WEEK.map(({ day, label }) => {
+                            const isWorking = editingSpecialist.workingDays.includes(day);
+                            return (
+                              <button
+                                key={day}
+                                type="button"
+                                onClick={() => handleToggleSpecialistDay(day)}
+                                className={cn(
+                                  'h-9 w-12 rounded-xl border text-xs font-semibold transition-all cursor-pointer',
+                                  isWorking
+                                    ? 'border-[#667052] bg-[#667052] text-[#FFFCF6] shadow-xs'
+                                    : 'border-[#E5E0D5] bg-[#FFFCF6] text-[#77776B] hover:border-[#C6B99F]'
+                                )}
+                              >
+                                {label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* ПРИВЯЗКА К УСЛУГАМ */}
+                      <div className="space-y-2 text-xs">
+                        <label className="font-semibold text-[#292A23]">
+                          Оказываемые процедуры (к каким услугам гость может выбрать этого мастера)
+                        </label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-36 overflow-y-auto p-2 rounded-xl border border-[#E5E0D5] bg-[#F7F4ED]/60">
+                          {services.map((srv) => {
+                            const isChecked = editingSpecialist.serviceIds.includes(srv.id);
+                            return (
+                              <label
+                                key={srv.id}
+                                className="flex items-center gap-2 text-xs text-[#292A23] cursor-pointer hover:text-[#667052]"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => handleToggleSpecialistService(srv.id)}
+                                  className="h-4 w-4 rounded border-[#C6B99F] text-[#667052] focus:ring-[#667052]"
+                                />
+                                <span className="truncate">{srv.title}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                        <div className="space-y-1.5">
+                          <label className="font-semibold text-[#292A23]">
+                            Цитата / кредо мастера
+                          </label>
+                          <Input
+                            placeholder="«Внимательное прикосновение и тишина лечат тело»"
+                            value={editingSpecialist.quote}
+                            onChange={(e) =>
+                              setEditingSpecialist({
+                                ...editingSpecialist,
+                                quote: e.target.value,
+                              })
+                            }
+                            className="h-10 text-xs"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="font-semibold text-[#292A23]">
+                            Подход к гостю (краткий bio)
+                          </label>
+                          <Input
+                            placeholder="Специализируется на расслабляющих и классических техниках..."
+                            value={editingSpecialist.approach}
+                            onChange={(e) =>
+                              setEditingSpecialist({
+                                ...editingSpecialist,
+                                approach: e.target.value,
+                              })
+                            }
+                            className="h-10 text-xs"
+                          />
+                        </div>
+                      </div>
+
+                      {/* ВЫБОР ФОТОГРАФИИ МАСТЕРА */}
+                      <div className="space-y-2 pt-1 border-t border-[#E5E0D5] text-xs">
+                        <label className="font-semibold text-[#292A23]">
+                          Портрет мастера (выберите готовый пресет или укажите URL)
+                        </label>
+                        <Input
+                          placeholder="https://images.unsplash.com/..."
+                          value={editingSpecialist.image}
+                          onChange={(e) =>
+                            setEditingSpecialist({
+                              ...editingSpecialist,
+                              image: e.target.value,
+                            })
+                          }
+                          className="h-10 text-xs font-mono"
+                        />
+
+                        {/* Быстрые пресеты фото */}
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
+                          <span className="text-[11px] text-[#77776B]">Пресеты студии:</span>
+                          {PRESET_SPECIALIST_IMAGES.map((preset, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() =>
+                                setEditingSpecialist({
+                                  ...editingSpecialist,
+                                  image: preset.url,
+                                })
+                              }
+                              className={cn(
+                                'h-9 px-2.5 rounded-lg border text-[11px] transition-all flex items-center gap-1.5 cursor-pointer',
+                                editingSpecialist.image === preset.url
+                                  ? 'border-[#667052] bg-[#667052]/10 font-medium text-[#4F5B3E]'
+                                  : 'border-[#E5E0D5] bg-[#FFFCF6] text-[#5E5E53] hover:border-[#C6B99F]'
+                              )}
+                              title={preset.label}
+                            >
+                              <img
+                                src={preset.url}
+                                alt="Пресет"
+                                className="h-5 w-5 rounded-full object-cover"
+                              />
+                              <span>Мастер {idx + 1}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E5E0D5]">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setIsSpecialistFormOpen(false)}
+                          className="text-xs"
+                        >
+                          Отмена
+                        </Button>
+                        <Button
+                          type="submit"
+                          className="bg-[#667052] hover:bg-[#4F5B3E] text-[#FFFCF6] text-xs font-semibold px-6"
+                        >
+                          Сохранить мастера
+                        </Button>
+                      </div>
+                    </form>
+                  )}
+
+                  {/* СПИСОК МАСТЕРОВ */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    {specialists.map((sp) => (
+                      <div
+                        key={sp.id}
+                        className="rounded-2xl border border-[#E5E0D5] bg-[#FFFCF6] p-4 flex flex-col justify-between gap-3 transition-all hover:border-[#C6B99F] shadow-xs"
+                      >
+                        <div className="flex items-start gap-3.5">
+                          <img
+                            src={sp.image}
+                            alt={sp.name}
+                            className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl object-cover shrink-0 border border-[#E5E0D5]"
+                          />
+                          <div className="min-w-0 space-y-1">
+                            <h4 className="font-serif text-lg font-medium text-[#292A23] truncate">
+                              {sp.name}
+                            </h4>
+                            <p className="text-xs text-[#667052] font-medium">
+                              {sp.role} · {sp.experienceYears}
+                            </p>
+                            <p className="text-xs text-[#5E5E53] line-clamp-2">
+                              {sp.approach}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Рабочие дни мастера */}
+                        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#E5E0D5] text-xs">
+                          <div className="flex items-center gap-1">
+                            {DAYS_OF_WEEK.map(({ day, label }) => {
+                              const isWork = sp.workingDays.includes(day);
+                              return (
+                                <span
+                                  key={day}
+                                  className={cn(
+                                    'h-5 w-6 flex items-center justify-center rounded text-[10px] font-semibold',
+                                    isWork
+                                      ? 'bg-[#667052]/15 text-[#4F5B3E]'
+                                      : 'bg-transparent text-gray-300'
+                                  )}
+                                >
+                                  {label}
+                                </span>
+                              );
+                            })}
+                          </div>
+
+                          <div className="flex items-center gap-1.5">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditSpecialist(sp)}
+                              className="h-8 px-2.5 text-xs gap-1"
+                            >
+                              <Edit3 className="h-3 w-3 text-[#667052]" />
+                              <span>Изменить</span>
+                            </Button>
+
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteSpecialist(sp.id, sp.name)}
+                              className="h-8 w-8 p-0 text-[#77776B] hover:text-[#B44C3E]"
+                              title="Удалить мастера"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ================= ВКЛАДКА 4: НАСТРОЙКА TELEGRAM ================= */}
               {activeTab === 'telegram' && (
                 <div className="space-y-6 max-w-2xl">
                   {/* Пояснительная карточка */}
@@ -997,7 +1988,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                 </div>
               )}
 
-              {/* ================= ВКЛАДКА 3: РУЧНОЕ СОЗДАНИЕ ЗАПИСИ ================= */}
+              {/* ================= ВКЛАДКА 5: РУЧНОЕ СОЗДАНИЕ ЗАПИСИ ================= */}
               {activeTab === 'new-booking' && (
                 <div className="space-y-5 max-w-xl">
                   <div className="rounded-xl border border-[#E5E0D5] bg-[#F7F4ED] p-4 text-xs text-[#5E5E53]">
@@ -1021,7 +2012,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         onChange={(e) => setManualServiceId(e.target.value)}
                         className="w-full h-11 rounded-xl border border-[#E5E0D5] bg-[#FFFCF6] px-3 text-xs text-[#292A23] focus:outline-none focus:ring-1 focus:ring-[#667052]"
                       >
-                        {SERVICES_CATALOG.map((s) => (
+                        {services.map((s) => (
                           <option key={s.id} value={s.id}>
                             {s.title} ({s.durationMinutes} мин · {formatPrice(s.price)})
                           </option>
@@ -1039,7 +2030,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         className="w-full h-11 rounded-xl border border-[#E5E0D5] bg-[#FFFCF6] px-3 text-xs text-[#292A23] focus:outline-none focus:ring-1 focus:ring-[#667052]"
                       >
                         <option value="any">Любой свободный мастер</option>
-                        {SPECIALISTS_CATALOG.map((sp) => (
+                        {specialists.map((sp) => (
                           <option key={sp.id} value={sp.id}>
                             {sp.name} ({sp.role})
                           </option>
@@ -1124,7 +2115,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                 </div>
               )}
 
-              {/* ================= ВКЛАДКА 4: НАСТРОЙКИ И ДАННЫЕ ================= */}
+              {/* ================= ВКЛАДКА 6: НАСТРОЙКИ И ДАННЫЕ ================= */}
               {activeTab === 'settings' && (
                 <div className="space-y-5 max-w-xl">
                   <div className="rounded-2xl border border-[#E5E0D5] bg-[#FFFCF6] p-5 space-y-3">

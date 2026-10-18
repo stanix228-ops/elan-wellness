@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ArrowUpRight, CheckCircle2 } from 'lucide-react';
-import { SPECIALISTS_CATALOG } from '@/config/specialists';
+import { useStudioCatalog } from '@/lib/catalogStore';
 import { studioConfig } from '@/config/studioConfig';
 import { Button } from '@/components/ui/button';
 import { WellnessImage } from '@/components/ui/wellness-image';
@@ -12,6 +12,7 @@ interface SpecialistsSectionProps {
 export const SpecialistsSection: React.FC<SpecialistsSectionProps> = ({
   onSelectSpecialistForBooking,
 }) => {
+  const { specialists } = useStudioCatalog();
   return (
     <section
       id="specialists"
@@ -39,7 +40,7 @@ export const SpecialistsSection: React.FC<SpecialistsSectionProps> = ({
 
         {/* Сетка специалистов */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-          {SPECIALISTS_CATALOG.map((specialist) => (
+          {specialists.map((specialist) => (
             <article
               key={specialist.id}
               className="group flex flex-col justify-between rounded-[26px] border border-[#E5E0D5] bg-[#F7F4ED] p-5 sm:p-6 transition-all duration-300 hover:border-[#667052]/50 hover:bg-[#FFFCF6] hover:shadow-md"

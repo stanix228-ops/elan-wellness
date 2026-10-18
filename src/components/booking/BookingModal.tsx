@@ -25,11 +25,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import {
-  SERVICES_CATALOG,
   SERVICE_CATEGORIES,
   type ServiceCategory,
 } from '@/config/services';
-import { SPECIALISTS_CATALOG } from '@/config/specialists';
+import { useStudioCatalog } from '@/lib/catalogStore';
 import { studioConfig } from '@/config/studioConfig';
 import {
   formatHumanDate,
@@ -82,10 +81,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     return toLocalIsoDate(d);
   }, []);
 
+  const { services, specialists } = useStudioCatalog();
   const [step, setStep] = React.useState<BookingStep>(1);
   const [categoryFilter, setCategoryFilter] = React.useState<ServiceCategory>('all');
   const [serviceId, setServiceId] = React.useState<string>(
-    initialServiceId || SERVICES_CATALOG[0].id
+    initialServiceId || services[0]?.id || 'classic-massage'
   );
   const [specialistId, setSpecialistId] = React.useState<string>(
     initialSpecialistId || 'any'
@@ -135,19 +135,19 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       setStep(2);
     } else if (initialSpecialistId) {
       setSpecialistId(initialSpecialistId);
-      const sp = SPECIALISTS_CATALOG.find((s) => s.id === initialSpecialistId);
+      const sp = specialists.find((s) => s.id === initialSpecialistId);
       if (sp && !sp.serviceIds.includes(serviceId)) {
-        setServiceId(sp.serviceIds[0] || SERVICES_CATALOG[0].id);
+        setServiceId(sp.serviceIds[0] || services[0]?.id || 'classic-massage');
       }
       setStep(1);
     } else {
       setStep(1);
     }
-  }, [open, initialServiceId, initialSpecialistId]);
+  }, [open, initialServiceId, initialSpecialistId, specialists, services, serviceId, specialistId]);
 
   const selectedService = React.useMemo(
-    () => getServiceById(serviceId) || SERVICES_CATALOG[0],
-    [serviceId]
+    () => getServiceById(serviceId) || services[0],
+    [serviceId, services]
   );
 
   const compatibleSpecialists = React.useMemo(
@@ -156,8 +156,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   );
 
   const selectedSpecialistObj = React.useMemo(
-    () => SPECIALISTS_CATALOG.find((s) => s.id === specialistId),
-    [specialistId]
+    () => specialists.find((s) => s.id === specialistId),
+    [specialistId, specialists]
   );
 
   const specialistDisplayName = React.useMemo(() => {
@@ -188,9 +188,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   }, [slots, timeSlot]);
 
   const filteredServices = React.useMemo(() => {
-    if (categoryFilter === 'all') return SERVICES_CATALOG;
-    return SERVICES_CATALOG.filter((s) => s.category === categoryFilter);
-  }, [categoryFilter]);
+    if (categoryFilter === 'all') return services;
+    return services.filter((s) => s.category === categoryFilter);
+  }, [categoryFilter, services]);
 
   const handleNextStep = () => {
     setStepError(null);

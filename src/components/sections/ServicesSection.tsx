@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { ArrowUpRight, Clock, Sparkles } from 'lucide-react';
 import {
-  SERVICES_CATALOG,
   SERVICE_CATEGORIES,
   type ServiceCategory,
 } from '@/config/services';
+import { useStudioCatalog } from '@/lib/catalogStore';
 import { studioConfig } from '@/config/studioConfig';
 import { Button } from '@/components/ui/button';
 import { WellnessImage } from '@/components/ui/wellness-image';
@@ -17,13 +17,14 @@ interface ServicesSectionProps {
 export const ServicesSection: React.FC<ServicesSectionProps> = ({
   onSelectServiceForBooking,
 }) => {
+  const { services } = useStudioCatalog();
   const [activeCategory, setActiveCategory] =
     React.useState<ServiceCategory>('all');
 
   const filteredServices = React.useMemo(() => {
-    if (activeCategory === 'all') return SERVICES_CATALOG;
-    return SERVICES_CATALOG.filter((s) => s.category === activeCategory);
-  }, [activeCategory]);
+    if (activeCategory === 'all') return services;
+    return services.filter((s) => s.category === activeCategory);
+  }, [activeCategory, services]);
 
   return (
     <section

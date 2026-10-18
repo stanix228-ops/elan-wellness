@@ -40,10 +40,7 @@ export interface BrandPreset {
   specialists: StudioSpecialist[];
 }
 
-// ============================================================================
-// 1. ПРЕСЕТ: «Массаж СПА» (Москва, ЖК «Прокшино», м. «Прокшино»)
-// Ссылка: https://yandex.kz/maps/org/massazh_spa/110204625320/?ll=37.427560%2C55.594693&z=16
-// ============================================================================
+// 1. «Массаж СПА» (Москва, ЖК «Прокшино», м. «Прокшино»)
 const MASSAZH_SPA_PRESET: BrandPreset = {
   id: 'massazh-spa',
   name: 'Массаж СПА',
@@ -217,10 +214,7 @@ const MASSAZH_SPA_PRESET: BrandPreset = {
   ],
 };
 
-// ============================================================================
-// 2. ПРЕСЕТ: «ТАЙРАЙ» (Москва, ул. Большая Дорогомиловская, 10, м. «Киевская»)
-// Ссылка: https://yandex.kz/maps/org/tayray/133642635708/?ll=37.563027%2C55.746259&z=16
-// ============================================================================
+// 2. «ТАЙРАЙ» (Москва, ул. Большая Дорогомиловская, 10, м. «Киевская»)
 const TAIRAY_PRESET: BrandPreset = {
   id: 'tairai',
   name: 'ТАЙРАЙ',
@@ -394,10 +388,7 @@ const TAIRAY_PRESET: BrandPreset = {
   ],
 };
 
-// ============================================================================
-// 3. ПРЕСЕТ: «Just Relax» (Москва, ул. Гашека, 11, м. «Маяковская» / «Белорусская»)
-// Ссылка: https://yandex.kz/maps/org/just_relax/152852320837/?ll=37.591099%2C55.769753&z=16
-// ============================================================================
+// 3. «Just Relax» (Москва, ул. Гашека, 11, м. «Маяковская» / «Белорусская»)
 const JUST_RELAX_PRESET: BrandPreset = {
   id: 'just-relax',
   name: 'Just Relax',
@@ -571,10 +562,7 @@ const JUST_RELAX_PRESET: BrandPreset = {
   ],
 };
 
-// ============================================================================
-// 4. ПРЕСЕТ: «Мари» (Москва, Новинский бульвар, 18Б, м. «Смоленская» / «Арбат»)
-// Ссылка: https://yandex.kz/maps/org/mari/59408755279/?ll=37.585341%2C55.754872&z=16
-// ============================================================================
+// 4. «Мари» (Москва, Новинский бульвар, 18Б, м. «Смоленская» / «Арбат»)
 const MARI_PRESET: BrandPreset = {
   id: 'mari',
   name: 'Мари',
@@ -748,10 +736,7 @@ const MARI_PRESET: BrandPreset = {
   ],
 };
 
-// ============================================================================
-// 5. ПРЕСЕТ: «Изумрудный Будда» (Москва, Нахимовский проспект, 33/2, м. «Профсоюзная»)
-// Ссылка: https://yandex.kz/maps/org/izumrudny_budda/1165939516/?ll=37.577715%2C55.672163&z=14
-// ============================================================================
+// 5. «Изумрудный Будда» (Москва, Нахимовский проспект, 33/2, м. «Профсоюзная»)
 const IZUMRUDNY_BUDDA_PRESET: BrandPreset = {
   id: 'izumrudny-budda',
   name: 'Изумрудный Будда',
@@ -925,10 +910,7 @@ const IZUMRUDNY_BUDDA_PRESET: BrandPreset = {
   ],
 };
 
-// ============================================================================
-// 6. ПРЕСЕТ: «Центр массажа и эпиляции» (г. Московский, 3-й мкр-н, д. 9)
-// Ссылка: https://yandex.kz/maps/org/tsentr_massazha_i_epilyatsii/15968009848/?ll=37.344673%2C55.595863&z=16
-// ============================================================================
+// 6. «Центр массажа и эпиляции» (г. Московский, 3-й мкр-н, д. 9)
 const MOSKOVSKY_PRESET: BrandPreset = {
   id: 'moskovsky',
   name: 'Центр массажа и эпиляции',
@@ -1103,10 +1085,7 @@ const MOSKOVSKY_PRESET: BrandPreset = {
   ],
 };
 
-// ============================================================================
-// 7. ПРЕСЕТ: Студия «Массаж на Миля» (Москва, ул. Авиаконструктора Миля, 14, м. «Жулебино»)
-// Ссылка: https://yandex.kz/maps/org/massazh/1000205810/?ll=37.855572%2C55.682367&z=16
-// ============================================================================
+// 7. «Массаж на Миля» (Москва, ул. Авиаконструктора Миля, 14, м. «Жулебино»)
 const ZHULEBINO_PRESET: BrandPreset = {
   id: 'zhulebino',
   name: 'Студия Массажа на Миля',
@@ -1280,10 +1259,7 @@ const ZHULEBINO_PRESET: BrandPreset = {
   ],
 };
 
-// ============================================================================
-// 8. ПРЕСЕТ: «Афродита SPA» (Москва, Ленинский проспект, 158, ГК «Салют», м. «Тропарёво»)
-// Ссылка: https://yandex.kz/maps/org/afrodita/1801653173/?ll=37.483310%2C55.651220&z=15
-// ============================================================================
+// 8. «Афродита SPA» (Москва, Ленинский проспект, 158, ГК «Салют», м. «Тропарёво»)
 const AFRODITA_PRESET: BrandPreset = {
   id: 'afrodita',
   name: 'Афродита SPA',
@@ -1306,7 +1282,7 @@ const AFRODITA_PRESET: BrandPreset = {
   yandexMapsUrl: 'https://yandex.kz/maps/org/afrodita/1801653173/?ll=37.483310%2C55.651220&z=15',
   workingHours: 'Ежедневно: 10:00 — 22:00',
   parkingNote: 'Охраняемая парковка гостиничного комплекса «Салют» · 7 минут пешком от м. Тропарёво',
-  paletteName: 'Морская пена & Античное золото',
+  paletteName: 'Морская пена & Средиземноморское золото',
   theme: {
     bg: '#F5F8F8',
     surface: '#FCFEFE',
@@ -1456,10 +1432,7 @@ const AFRODITA_PRESET: BrandPreset = {
   ],
 };
 
-// ============================================================================
-// 9. ПРЕСЕТ: Салон «Адель» (Москва, ул. Маросейка, 6-8с1, м. «Китай-город»)
-// Ссылка: https://yandex.kz/maps/org/adel/1273390949/?ll=37.635207%2C55.757506&z=16
-// ============================================================================
+// 9. «Адель» (Москва, ул. Маросейка, 6-8с1, м. «Китай-город»)
 const ADEL_PRESET: BrandPreset = {
   id: 'adel',
   name: 'Адель Beauty & Body',
@@ -1632,10 +1605,7 @@ const ADEL_PRESET: BrandPreset = {
   ],
 };
 
-// ============================================================================
-// 10. ПРЕСЕТ: Салон красоты «Сакура» (Москва, Севастопольский проспект, 15к1, м. «Крымская»)
-// Ссылка: https://yandex.kz/maps/org/salon_krasoty/1372376382/?ll=37.599617%2C55.683062&z=14
-// ============================================================================
+// 10. «Сакура» (Москва, Севастопольский проспект, 15к1, м. «Крымская»)
 const SAKURA_PRESET: BrandPreset = {
   id: 'sakura',
   name: 'Салон красоты и массажа «Сакура»',
@@ -1808,9 +1778,696 @@ const SAKURA_PRESET: BrandPreset = {
   ],
 };
 
-// ============================================================================
-// 11. ПРЕСЕТ: «ÉLAN Wellness» (Флагманский премиум-концепт, Алматы, Олива & Лен)
-// ============================================================================
+// 11. «Dress Code» (Москва, ул. Барвихинская, 4к2, м. «Сетунь» / «Молодёжная»)
+const DRESS_CODE_PRESET: BrandPreset = {
+  id: 'dress-code',
+  name: 'Dress Code Beauty & SPA',
+  shortName: 'Dress Code',
+  tagline: 'Безупречный стиль, оздоровительный массаж и эстетика тела на Барвихинской.',
+  eyebrow: 'BEAUTY CODE · MASSAGE · RELAXATION · KUNTSEVO',
+  heroTitleLine1: 'Ваш безупречный',
+  heroTitleLine2: 'Dress Code.',
+  heroSubtitle: 'Студия красоты и расслабляющего массажа на Барвихинской улице. Профессиональный уход за телом, снятие мышечных зажимов, восстановительный массаж и эстетика в Западном округе Москвы.',
+  heroImage: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1800&q=85',
+  city: 'Москва',
+  currency: 'RUB',
+  currencySymbol: '₽',
+  phone: '+79055459967',
+  phoneDisplay: '+7 (905) 545-99-67',
+  address: 'г. Москва, ул. Барвихинская, д. 4, корп. 2 (1 этаж)',
+  addressLine1: 'Москва, ул. Барвихинская, д. 4, корп. 2',
+  addressLine2: '1 этаж, отдельный вход, м. «Сетунь» / «Молодёжная»',
+  subway: 'м. Сетунь',
+  yandexMapsUrl: 'https://yandex.kz/maps/org/dress_code/1148992182/?ll=37.391332%2C55.716233&z=14',
+  workingHours: 'Ежедневно: 10:00 — 20:00',
+  parkingNote: 'Бесплатная парковка вокруг дома · 5 минут пешком от станции МЦД Сетунь',
+  paletteName: 'Шоколадный кашемир & Тёплый беж',
+  theme: {
+    bg: '#F8F6F2',
+    surface: '#FCFAF6',
+    primary: '#5C4438',
+    primaryHover: '#47342A',
+    accent: '#C2A287',
+    accentSoft: '#EFE7DE',
+    text: '#27221E',
+    textMuted: '#665B54',
+    border: '#E3D8CD',
+  },
+  services: [
+    {
+      id: 'dc-classic-60',
+      code: 'DC-01',
+      title: 'Общий восстановительный массаж',
+      subtitle: 'Комплексная проработка мышц всего тела',
+      category: 'classic',
+      categoryLabel: 'Классика',
+      durationMinutes: 60,
+      price: 3200,
+      description: 'Мягкое снятие усталости, восстановление подвижности мышц и суставов, улучшение общего тонуса и циркуляции крови.',
+      sensoryNotes: ['миндальное масло', 'тёплый свет', 'полный релакс'],
+      intensity: 'Средняя',
+      image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Восстановительный массаж Dress Code',
+      featuredNote: 'Базовая программа',
+    },
+    {
+      id: 'dc-back-45',
+      code: 'DC-02',
+      title: 'Терапевтический массаж спины и ШВЗ',
+      subtitle: 'Снятие зажимов в лопатках, шее и пояснице',
+      category: 'recovery',
+      categoryLabel: 'Здоровая спина',
+      durationMinutes: 45,
+      price: 2400,
+      description: 'Прицельная работа с мышечными триггерами, освобождение зажатых нервных волокон, устранение болей от сидячей работы.',
+      sensoryNotes: ['точечный нажим', 'снятие гипертонуса', 'лёгкость в плечах'],
+      intensity: 'Глубокая',
+      image: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Массаж спины Dress Code',
+      featuredNote: 'Хит для спины',
+    },
+    {
+      id: 'dc-anticell-60',
+      code: 'DC-03',
+      title: 'Антицеллюлитный моделирующий массаж',
+      subtitle: 'Активное моделирование контуров бедер и талии',
+      category: 'recovery',
+      categoryLabel: 'Коррекция фигуры',
+      durationMinutes: 60,
+      price: 3400,
+      description: 'Интенсивная ручная техника для ускорения микроциркуляции, подтяжки контуров тела и выравнивания рельефа кожи.',
+      sensoryNotes: ['термо-масло', 'активный дренаж', 'упругость кожи'],
+      intensity: 'Глубокая',
+      image: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Антицеллюлитный массаж Dress Code',
+    },
+    {
+      id: 'dc-relax-75',
+      code: 'DC-04',
+      title: 'Релакс-массаж с аромамаслами',
+      subtitle: 'Антистресс-программа для тела и души',
+      category: 'relax',
+      categoryLabel: 'Релакс',
+      durationMinutes: 75,
+      price: 3800,
+      description: 'Мягкие скользящие техники с композицией тёплых масел. Устраняет бессонницу и ментальное напряжение после рабочей недели.',
+      sensoryNotes: ['аромат лаванды', 'тёплый плед', 'спокойная музыка'],
+      intensity: 'Мягкая',
+      image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Релакс массаж Dress Code',
+    },
+    {
+      id: 'dc-drain-60',
+      code: 'DC-05',
+      title: 'Лимфодренажный детокс-массаж',
+      subtitle: 'Выведение лишней жидкости и снятие отёков',
+      category: 'relax',
+      categoryLabel: 'Лимфодренаж',
+      durationMinutes: 60,
+      price: 3200,
+      description: 'Волнообразные мягкие выжимания по ходу лимфотока. Возвращает ощущение невесомости ногам и всему телу.',
+      sensoryNotes: ['дренажный ритм', 'детокс-эффект', 'лёгкость походки'],
+      intensity: 'Мягкая',
+      image: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Лимфодренажный массаж Dress Code',
+    },
+    {
+      id: 'dc-spa-90',
+      code: 'DC-06',
+      title: 'СПА-программа «Идеальный силуэт Dress Code»',
+      subtitle: 'Скрабирование + массаж всего тела + чайный ритуал',
+      category: 'rituals',
+      categoryLabel: 'Спа-ритуалы',
+      durationMinutes: 90,
+      price: 5500,
+      description: 'Комплексный премиум-уход: бережный пилинг тела, расслабляющий массаж с тёплыми маслами и травяной сбор со сладостями.',
+      sensoryNotes: ['кофейно-сахарный скраб', 'тёплые масла', 'травяной сбор'],
+      intensity: 'Адаптивная',
+      image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'СПА программа Dress Code',
+      featuredNote: 'Топ-уход',
+    },
+  ],
+  specialists: [
+    {
+      id: 'dc-oksana',
+      name: 'Оксана Григорьева',
+      role: 'Мастер моделирующего и оздоровительного массажа (стаж 8 лет)',
+      experienceYears: '8 лет опыта',
+      approach: 'Чуткий специалист с медицинским образованием. Владеет авторскими техниками лимфодренажа и коррекции фигуры.',
+      quote: '«Уход за телом — это лучшая инвестиция в своё прекрасное самочувствие».',
+      specialties: ['Оздоровительный массаж', 'Коррекция фигуры', 'Релакс'],
+      serviceIds: ['dc-classic-60', 'dc-anticell-60', 'dc-spa-90'],
+      workingDays: [1, 2, 3, 5, 6],
+      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1000&q=80',
+      imageAlt: 'Мастер Оксана Григорьева',
+    },
+    {
+      id: 'dc-artem',
+      name: 'Артём Белов',
+      role: 'Специалист по глубокотканной терапии спины (стаж 7 лет)',
+      experienceYears: '7 лет опыта',
+      approach: 'Сильный и точный специалист по работе с мышечными зажимами шеи, лопаток и поясницы.',
+      quote: '«Прямая спина меняет походку и уровень энергии на весь день».',
+      specialties: ['Массаж спины', 'Спортивный массаж', 'Лимфодренаж'],
+      serviceIds: ['dc-back-45', 'dc-classic-60', 'dc-drain-60'],
+      workingDays: [0, 2, 4, 5, 6],
+      image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80',
+      imageAlt: 'Мастер Артём Белов',
+    },
+    {
+      id: 'dc-maria',
+      name: 'Мария Елисеева',
+      role: 'Мастер расслабляющих техник и эстетики тела (стаж 5 лет)',
+      experienceYears: '5 лет опыта',
+      approach: 'Создаёт атмосферу абсолютного покоя и уюта. Виртуозно владеет аромамассажем и спа-уходами.',
+      quote: '«Тишина, тепло и бережные руки возвращают внутреннее равновесие».',
+      specialties: ['Ароматерапия', 'СПА-программы', 'Релакс'],
+      serviceIds: ['dc-relax-75', 'dc-drain-60', 'dc-spa-90'],
+      workingDays: [1, 3, 4, 5, 6],
+      image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=1000&q=80',
+      imageAlt: 'Мастер Мария Елисеева',
+    },
+  ],
+};
+
+// 12. «Touch Studio» (Москва, ул. Борисовские Пруды, 12к1, м. «Борисово» / «Марьино»)
+const TOUCH_STUDIO_PRESET: BrandPreset = {
+  id: 'touch-studio',
+  name: 'Touch Studio Beauty & Body',
+  shortName: 'Touch Studio',
+  tagline: 'Современная эстетика тела, массаж и бережный уход на Борисовских Прудах.',
+  eyebrow: 'TOUCH & BODY BALANCE · BORISOVO · AESTHETICS',
+  heroTitleLine1: 'Прикосновение',
+  heroTitleLine2: 'к гармонии.',
+  heroSubtitle: 'Современная студия эстетики тела и массажа на Борисовских Прудах. Коррекция фигуры, аппаратный и ручной массаж, глубокий релакс и забота о коже у метро «Борисово».',
+  heroImage: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=1800&q=85',
+  city: 'Москва',
+  currency: 'RUB',
+  currencySymbol: '₽',
+  phone: '+79060968976',
+  phoneDisplay: '+7 (906) 096-89-76',
+  address: 'г. Москва, ул. Борисовские Пруды, д. 12, корп. 1 (1 этаж)',
+  addressLine1: 'Москва, ул. Борисовские Пруды, д. 12, корп. 1',
+  addressLine2: '1 этаж, отдельный вход, м. «Борисово» / «Марьино»',
+  subway: 'м. Борисово',
+  yandexMapsUrl: 'https://yandex.kz/maps/org/touch_studio/1375392843/?ll=37.743420%2C55.636150&z=14',
+  workingHours: 'Ежедневно: 09:00 — 21:00',
+  parkingNote: 'Парковка перед зданием студии · 6 минут пешком от м. Борисово',
+  paletteName: 'Бирюзовый малахит & Белый мрамор',
+  theme: {
+    bg: '#F4F8F8',
+    surface: '#FCFEFE',
+    primary: '#2B616D',
+    primaryHover: '#1D464F',
+    accent: '#76A9B4',
+    accentSoft: '#E1EEF0',
+    text: '#1D2628',
+    textMuted: '#52666B',
+    border: '#D2E3E6',
+  },
+  services: [
+    {
+      id: 'ts-relax-60',
+      code: 'TS-01',
+      title: 'Общий расслабляющий массаж Touch',
+      subtitle: 'Мягкое мышечное расслабление и антистресс',
+      category: 'relax',
+      categoryLabel: 'Релакс',
+      durationMinutes: 60,
+      price: 3200,
+      description: 'Бережные плавные техники для снятия зажимов, улучшения сна и нормализации эмоционального состояния.',
+      sensoryNotes: ['натуральное масло', 'мягкий свет', 'снятие напряжения'],
+      intensity: 'Мягкая',
+      image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Расслабляющий массаж Touch Studio',
+      featuredNote: 'Популярно у гостей',
+    },
+    {
+      id: 'ts-hardware-45',
+      code: 'TS-02',
+      title: 'Аппаратный массаж коррекции фигуры',
+      subtitle: 'Моделирование талии, бёдер и ягодиц',
+      category: 'recovery',
+      categoryLabel: 'Аппаратная коррекция',
+      durationMinutes: 45,
+      price: 2600,
+      description: 'Вакуумно-роликовая методика для активного уменьшения объёмов, активизации лимфотока и повышения упругости кожи.',
+      sensoryNotes: ['вакуумно-роликовый лифтинг', 'активный дренаж', 'гладкая кожа'],
+      intensity: 'Глубокая',
+      image: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Аппаратный массаж',
+      featuredNote: 'Хит силуэта',
+    },
+    {
+      id: 'ts-back-45',
+      code: 'TS-03',
+      title: 'Массаж спины и шейно-воротниковой зоны',
+      subtitle: 'Снятие скованности и напряжения в плечах',
+      category: 'recovery',
+      categoryLabel: 'Здоровая спина',
+      durationMinutes: 45,
+      price: 2400,
+      description: 'Точечная проработка лопаточной зоны, шеи и поясницы. Снимает головные боли напряжения и улучшает осанку.',
+      sensoryNotes: ['точечный нажим', 'ортопедическая кушетка', 'лёгкость в спине'],
+      intensity: 'Глубокая',
+      image: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Массаж спины',
+    },
+    {
+      id: 'ts-drain-60',
+      code: 'TS-04',
+      title: 'Лимфодренажный детокс-массаж',
+      subtitle: 'Выведение застойной жидкости и лёгкость походки',
+      category: 'relax',
+      categoryLabel: 'Лимфодренаж',
+      durationMinutes: 60,
+      price: 3300,
+      description: 'Ритмичная мягкая компрессия по линиям лимфотока. Снимает отёки ног, возвращает свежесть и бодрость телу.',
+      sensoryNotes: ['дренажный эффект', 'детокс-протокол', 'невесомость'],
+      intensity: 'Мягкая',
+      image: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Лимфодренажный массаж',
+    },
+    {
+      id: 'ts-face-45',
+      code: 'TS-05',
+      title: 'Скульптурирующий массаж лица Touch Face',
+      subtitle: 'Миофасциальный лифтинг овала лица',
+      category: 'recovery',
+      categoryLabel: 'Эстетика лица',
+      durationMinutes: 45,
+      price: 2800,
+      description: 'Скульптурирующая проработка мышц лица и шеи. Убирает отёки, подтягивает контуры и возвращает лицу отдохнувший вид.',
+      sensoryNotes: ['лифтинг-эффект', 'пептидная сыворотка', 'сияние лица'],
+      intensity: 'Средняя',
+      image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Массаж лица Touch Face',
+    },
+    {
+      id: 'ts-reboot-90',
+      code: 'TS-06',
+      title: 'Комплексная программа «Touch Reboot»',
+      subtitle: 'Массаж тела (60 мин) + массаж лица (30 мин)',
+      category: 'rituals',
+      categoryLabel: 'Спа-ритуалы',
+      durationMinutes: 90,
+      price: 5400,
+      description: 'Флагманский ритуал перезагрузки: полный массаж тела для глубокого расслабления и скульптурирующий уход за лицом.',
+      sensoryNotes: ['комплексный уход', 'тёплый плед', 'чайный ритуал'],
+      intensity: 'Адаптивная',
+      image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Программа Touch Reboot',
+      featuredNote: 'Флагман студии',
+    },
+  ],
+  specialists: [
+    {
+      id: 'ts-anastasia',
+      name: 'Анастасия Романова',
+      role: 'Ведущий специалист по аппаратному и ручному массажу (стаж 7 лет)',
+      experienceYears: '7 лет опыта',
+      approach: 'В совершенстве владеет техниками моделирования фигуры и дренажа. Помогает гостям обрести лёгкость и подтянутые контуры.',
+      quote: '«Красота тела достигается регулярным и бережным вниманием к себе».',
+      specialties: ['Аппаратный массаж', 'Коррекция фигуры', 'Релакс'],
+      serviceIds: ['ts-hardware-45', 'ts-relax-60', 'ts-reboot-90'],
+      workingDays: [1, 2, 3, 5, 6],
+      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1000&q=80',
+      imageAlt: 'Мастер Анастасия Романова',
+    },
+    {
+      id: 'ts-ilya',
+      name: 'Илья Давыдов',
+      role: 'Мастер оздоровительного массажа спины (стаж 8 лет)',
+      experienceYears: '8 лет опыта',
+      approach: 'Глубоко и результативно прорабатывает спазмированные мышцы спины, устраняет зажимы от малоподвижного образа жизни.',
+      quote: '«Свободное движение без скованности — это основа отличного настроения».',
+      specialties: ['Массаж спины', 'Спортивный массаж', 'Лимфодренаж'],
+      serviceIds: ['ts-back-45', 'ts-drain-60', 'ts-relax-60'],
+      workingDays: [0, 2, 4, 5, 6],
+      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1000&q=80',
+      imageAlt: 'Мастер Илья Давыдов',
+    },
+    {
+      id: 'ts-svetlana',
+      name: 'Светлана Маркова',
+      role: 'Специалист по скульптурированию лица и дренажу (стаж 6 лет)',
+      experienceYears: '6 лет опыта',
+      approach: 'Мастер мягких эстетических методик. Возвращает коже лица упругость, а овалу — чёткие скульптурные линии.',
+      quote: '«Прикосновение должно быть точным, уважительным и восстанавливающим».',
+      specialties: ['Массаж лица', 'Эстетика тела', 'СПА-программы'],
+      serviceIds: ['ts-face-45', 'ts-drain-60', 'ts-reboot-90'],
+      workingDays: [1, 3, 4, 5, 6],
+      image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=1000&q=80',
+      imageAlt: 'Специалист Светлана Маркова',
+    },
+  ],
+};
+
+// 13. «Лица» (Москва, ул. Гвардейская, 14, м. «Кунцевская» / «Давыдково»)
+const LITSA_PRESET: BrandPreset = {
+  id: 'litsa',
+  name: 'Салон красоты и массажа «Лица»',
+  shortName: 'Лица',
+  tagline: 'Индивидуальность вашей красоты, скульптурный массаж и гармония тела в Кунцево.',
+  eyebrow: 'BEAUTY NETWORK · MASSAGE & SPA · KUNTSEVO',
+  heroTitleLine1: 'Индивидуальность',
+  heroTitleLine2: 'вашей красоты.',
+  heroSubtitle: 'Премиальный салон сети «Лица» на Гвардейской улице. Скульптурирующий массаж лица, оздоровительные техники для тела, снятие зажимов и бережный уход у метро «Кунцевская».',
+  heroImage: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1800&q=85',
+  city: 'Москва',
+  currency: 'RUB',
+  currencySymbol: '₽',
+  phone: '+74955049800',
+  phoneDisplay: '+7 (495) 504-98-00',
+  address: 'г. Москва, ул. Гвардейская, д. 14 (1 этаж)',
+  addressLine1: 'Москва, ул. Гвардейская, д. 14',
+  addressLine2: '1 этаж, отдельный вход, м. «Кунцевская» / «Давыдково»',
+  subway: 'м. Кунцевская',
+  yandexMapsUrl: 'https://yandex.kz/maps/org/litsa/1692735323/?ll=37.425109%2C55.724095&z=15',
+  workingHours: 'Ежедневно: 09:00 — 21:00',
+  parkingNote: 'Бесплатная парковка возле дома · 8 минут пешком от м. Кунцевская',
+  paletteName: 'Глубокий изумруд & Платиновое серебро',
+  theme: {
+    bg: '#F5F8F6',
+    surface: '#FCFEFC',
+    primary: '#2D5948',
+    primaryHover: '#1F4033',
+    accent: '#8DAEA0',
+    accentSoft: '#E3EFE9',
+    text: '#1E2722',
+    textMuted: '#54665D',
+    border: '#D4E3DB',
+  },
+  services: [
+    {
+      id: 'li-face-60',
+      code: 'LI-01',
+      title: 'Фирменный скульптурирующий массаж «Лица»',
+      subtitle: 'Миофасциальный лифтинг и чёткий овал лица',
+      category: 'recovery',
+      categoryLabel: 'Эстетика лица',
+      durationMinutes: 60,
+      price: 3600,
+      description: 'Глубокая проработка мышц лица, шеи и зоны декольте. Устраняет спазмы жевательных мышц, снимает отёки и возвращает коже сияние.',
+      sensoryNotes: ['скульптурный лифтинг', 'сыворотка с коллагеном', 'чёткие контуры'],
+      intensity: 'Адаптивная',
+      image: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Скульптурирующий массаж Лица',
+      featuredNote: 'Фирменная методика',
+    },
+    {
+      id: 'li-classic-60',
+      code: 'LI-02',
+      title: 'Общий классический массаж тела',
+      subtitle: 'Гармоничная проработка мышечного корсета',
+      category: 'classic',
+      categoryLabel: 'Классика',
+      durationMinutes: 60,
+      price: 3200,
+      description: 'Традиционное глубокое разминание мышц спины, рук и ног. Снимает усталость и улучшает общее самочувствие.',
+      sensoryNotes: ['натуральное масло', 'мягкий свет', 'расслабление'],
+      intensity: 'Средняя',
+      image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Классический массаж',
+    },
+    {
+      id: 'li-back-45',
+      code: 'LI-03',
+      title: 'Массаж спины и воротниковой зоны',
+      subtitle: 'Прицельное снятие зажимов и усталости в шее',
+      category: 'recovery',
+      categoryLabel: 'Здоровая спина',
+      durationMinutes: 45,
+      price: 2400,
+      description: 'Интенсивная проработка проблемных зон вдоль позвоночника и трапеций. Освобождает от скованности после сидячей работы.',
+      sensoryNotes: ['точечная проработка', 'ортопедическая кушетка', 'лёгкость в плечах'],
+      intensity: 'Глубокая',
+      image: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Массаж спины',
+    },
+    {
+      id: 'li-drain-75',
+      code: 'LI-04',
+      title: 'Лимфодренажный детокс-массаж',
+      subtitle: 'Выведение застойной жидкости и снятие отёчности',
+      category: 'relax',
+      categoryLabel: 'Лимфодренаж',
+      durationMinutes: 75,
+      price: 3800,
+      description: 'Мягкий дренаж всего тела: ускоряет микроциркуляцию, очищает лимфатическую систему и возвращает телу лёгкость.',
+      sensoryNotes: ['дренажный эффект', 'лёгкие ноги', 'очищение организма'],
+      intensity: 'Мягкая',
+      image: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Лимфодренажный массаж',
+    },
+    {
+      id: 'li-anticell-60',
+      code: 'LI-05',
+      title: 'Антицеллюлитное моделирование силуэта',
+      subtitle: 'Коррекция проблемных зон и упругость кожи',
+      category: 'recovery',
+      categoryLabel: 'Коррекция фигуры',
+      durationMinutes: 60,
+      price: 3500,
+      description: 'Ручная интенсивная техника для уменьшения объёмов, выравнивания рельефа кожи и стимуляции выработки коллагена.',
+      sensoryNotes: ['термо-крем', 'моделирующий эффект', 'упругость кожи'],
+      intensity: 'Глубокая',
+      image: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Антицеллюлитный массаж',
+    },
+    {
+      id: 'li-spa-90',
+      code: 'LI-06',
+      title: 'СПА-программа «Гармония Лица & Тело»',
+      subtitle: 'Массаж тела (60 мин) + массаж лица (30 мин) + чай',
+      category: 'rituals',
+      categoryLabel: 'Спа-ритуалы',
+      durationMinutes: 90,
+      price: 5800,
+      description: 'Комплексный полуторачасовой сеанс: расслабляющий массаж тела, скульптурирующий массаж лица и авторский чайный комплимент.',
+      sensoryNotes: ['комплексный ритуал', 'свечи', 'травяной чай со сладостями'],
+      intensity: 'Адаптивная',
+      image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'СПА программа Гармония',
+      featuredNote: 'Топ-программа',
+    },
+  ],
+  specialists: [
+    {
+      id: 'li-evgenia',
+      name: 'Евгения Полякова',
+      role: 'Ведущий специалист по миофасциальному массажу лица (стаж 9 лет)',
+      experienceYears: '9 лет опыта',
+      approach: 'Эксперт по безоперационному омоложению. Виртуозно снимает спазмы мимических мышц и восстанавливает естественный овал лица.',
+      quote: '«Каждое лицо уникально. Массаж помогает раскрыть его природную свежесть».',
+      specialties: ['Скульптурный массаж', 'Эстетика лица', 'СПА-ритуалы'],
+      serviceIds: ['li-face-60', 'li-spa-90'],
+      workingDays: [1, 2, 3, 5, 6],
+      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1000&q=80',
+      imageAlt: 'Мастер Евгения Полякова',
+    },
+    {
+      id: 'li-denis',
+      name: 'Денис Котов',
+      role: 'Мастер глубокотканного массажа спины (стаж 8 лет)',
+      experienceYears: '8 лет опыта',
+      approach: 'Сильный и внимательный специалист. Эффективно работает со спортивными травмами, остеохондрозом и мышечным гипертонусом.',
+      quote: '«Здоровая и подвижная спина — это свобода в каждом движении».',
+      specialties: ['Массаж спины', 'Спортивный массаж', 'Классика'],
+      serviceIds: ['li-back-45', 'li-classic-60', 'li-anticell-60'],
+      workingDays: [0, 2, 4, 5, 6],
+      image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80',
+      imageAlt: 'Мастер Денис Котов',
+    },
+    {
+      id: 'li-nadezhda',
+      name: 'Надежда Смирнова',
+      role: 'Специалист по лимфодренажным и антицеллюлитным техникам (стаж 6 лет)',
+      experienceYears: '6 лет опыта',
+      approach: 'Мастер мягких, но результативных дренажных методик. Помогает телу сбросить отёки и восстановить лёгкость.',
+      quote: '«Лёгкость в теле рождает лёгкость в мыслях».',
+      specialties: ['Лимфодренаж', 'Антицеллюлитный массаж', 'Релакс'],
+      serviceIds: ['li-drain-75', 'li-classic-60', 'li-spa-90'],
+      workingDays: [1, 3, 4, 5, 6],
+      image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=1000&q=80',
+      imageAlt: 'Специалист Надежда Смирнова',
+    },
+  ],
+};
+
+// 14. «Камэрли» (Москва, Ленинский проспект, 72/2, м. «Университет» / «Вавиловская»)
+const KAMERLI_PRESET: BrandPreset = {
+  id: 'kamerli',
+  name: 'Салон красоты и массажа «Камэрли»',
+  shortName: 'Камэрли',
+  tagline: 'Эксклюзивная эстетика, авторский массаж и бережный уход на Ленинском.',
+  eyebrow: 'EXCLUSIVE BEAUTY & BODY · LENINSKY PROSPEKT',
+  heroTitleLine1: 'Эстетика стиля',
+  heroTitleLine2: 'и лёгкости.',
+  heroSubtitle: 'Премиальный салон красоты и студия массажа на Ленинском проспекте. Авторские массажные техники, глубокое снятие спазмов, пилинги, обёртывания и забота о теле у метро «Университет».',
+  heroImage: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&w=1800&q=85',
+  city: 'Москва',
+  currency: 'RUB',
+  currencySymbol: '₽',
+  phone: '+79776950533',
+  phoneDisplay: '+7 (977) 695-05-33',
+  address: 'г. Москва, Ленинский проспект, д. 72/2 (вход с ул. Строителей)',
+  addressLine1: 'Москва, Ленинский проспект, д. 72/2',
+  addressLine2: 'Вход со стороны ул. Строителей, м. «Университет» / «Вавиловская»',
+  subway: 'м. Университет',
+  yandexMapsUrl: 'https://yandex.kz/maps/org/kamerli/188155284735/?ll=37.540659%2C55.685797&z=16',
+  workingHours: 'Ежедневно: 10:00 — 21:00',
+  parkingNote: 'Парковка вдоль улицы Строителей · 8 минут пешком от м. Университет',
+  paletteName: 'Королевский бордо & Песочное золото',
+  theme: {
+    bg: '#FAF5F3',
+    surface: '#FFFDFC',
+    primary: '#743B48',
+    primaryHover: '#5A2C37',
+    accent: '#C59976',
+    accentSoft: '#F5EAE6',
+    text: '#292123',
+    textMuted: '#69575B',
+    border: '#E8DAD7',
+  },
+  services: [
+    {
+      id: 'km-author-90',
+      code: 'KM-01',
+      title: 'Авторский массаж «Камэрли»',
+      subtitle: 'Синтез глубокотканных и расслабляющих техник',
+      category: 'rituals',
+      categoryLabel: 'Авторские методики',
+      durationMinutes: 90,
+      price: 5200,
+      description: 'Флагманская процедура салона: индивидуальный подбор степени нажима, глубокая проработка зажатых мышц спины и шеи в сочетании с нежными аромамаслами.',
+      sensoryNotes: ['авторская методика', 'тёплые масла', 'полная перезагрузка'],
+      intensity: 'Адаптивная',
+      image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Авторский массаж Камэрли',
+      featuredNote: 'Флагман салона',
+    },
+    {
+      id: 'km-classic-60',
+      code: 'KM-02',
+      title: 'Классический массаж всего тела',
+      subtitle: 'Традиционное восстановление мышечного тонуса',
+      category: 'classic',
+      categoryLabel: 'Классика',
+      durationMinutes: 60,
+      price: 3400,
+      description: 'Комплексная проработка мышц спины, шейно-воротниковой зоны, рук и ног. Снимает накопленный стресс и улучшает лимфоток.',
+      sensoryNotes: ['натуральное масло', 'мягкий свет', 'снятие напряжения'],
+      intensity: 'Средняя',
+      image: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Классический массаж',
+    },
+    {
+      id: 'km-back-45',
+      code: 'KM-03',
+      title: 'Массаж спины и воротниковой зоны',
+      subtitle: 'Снятие зажимов и усталости в шейном отделе',
+      category: 'recovery',
+      categoryLabel: 'Здоровая спина',
+      durationMinutes: 45,
+      price: 2500,
+      description: 'Прицельная работа с триггерными узлами трапеций и поясницы. Быстро избавляет от скованности и возвращает комфорт движений.',
+      sensoryNotes: ['точечный нажим', 'ортопедическая кушетка', 'свобода движений'],
+      intensity: 'Глубокая',
+      image: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Массаж спины Камэрли',
+    },
+    {
+      id: 'km-anticell-60',
+      code: 'KM-04',
+      title: 'Моделирующий антицеллюлитный массаж',
+      subtitle: 'Активная коррекция проблемных зон и контуров',
+      category: 'recovery',
+      categoryLabel: 'Коррекция фигуры',
+      durationMinutes: 60,
+      price: 3600,
+      description: 'Интенсивная ручная техника для ускорения микроциркуляции, выравнивания рельефа кожи и подтяжки контуров тела.',
+      sensoryNotes: ['термо-гель', 'моделирующий эффект', 'упругость кожи'],
+      intensity: 'Глубокая',
+      image: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Антицеллюлитный массаж',
+    },
+    {
+      id: 'km-wrap-75',
+      code: 'KM-05',
+      title: 'СПА-обёртывание с пилингом для коррекции фигуры',
+      subtitle: 'Очищение солевым скрабом и тёплое обёртывание',
+      category: 'rituals',
+      categoryLabel: 'Спа-уходы',
+      durationMinutes: 75,
+      price: 4500,
+      description: 'Деликатный пилинг с морской солью и минеральное обёртывание для глубокого питания кожи, вывода токсинов и тонуса.',
+      sensoryNotes: ['морской солевой скраб', 'минеральное обертывание', 'шелковая кожа'],
+      intensity: 'Мягкая',
+      image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'СПА обертывание',
+    },
+    {
+      id: 'km-face-45',
+      code: 'KM-06',
+      title: 'Скульптурирующий массаж лица и шеи',
+      subtitle: 'Миофасциальный лифтинг и чёткий контур',
+      category: 'recovery',
+      categoryLabel: 'Эстетика лица',
+      durationMinutes: 45,
+      price: 2900,
+      description: 'Моделирование овала лица, снятие гипертонуса мимических мышц и улучшение цвета кожи с питательной сывороткой.',
+      sensoryNotes: ['лифтинг-эффект', 'сыворотка с пептидами', 'свежий цвет лица'],
+      intensity: 'Средняя',
+      image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1200&q=80',
+      imageAlt: 'Массаж лица Камэрли',
+    },
+  ],
+  specialists: [
+    {
+      id: 'km-kamilla',
+      name: 'Камилла Эргашева',
+      role: 'Основательница и ведущий мастер авторских программ (стаж 9 лет)',
+      experienceYears: '9 лет опыта',
+      approach: 'Создательница авторской массажной техники «Камэрли». Сочетает глубокую работу с фасциями и бережный релакс.',
+      quote: '«Индивидуальный подход к каждому гостю — это главный секрет настоящего преображения».',
+      specialties: ['Авторский массаж', 'Эстетика лица', 'СПА-программы'],
+      serviceIds: ['km-author-90', 'km-face-45', 'km-wrap-75'],
+      workingDays: [1, 2, 3, 5, 6],
+      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1000&q=80',
+      imageAlt: 'Мастер Камилла Эргашева',
+    },
+    {
+      id: 'km-vitaly',
+      name: 'Виталий Морозов',
+      role: 'Мастер глубокотканной терапии спины и спортивного массажа (стаж 8 лет)',
+      experienceYears: '8 лет опыта',
+      approach: 'Идеально распутывает хронические узлы в мышцах спины, снимает спазмы и возвращает лёгкость походке.',
+      quote: '«Здоровые мышцы — это фундамент физического и ментального комфорта».',
+      specialties: ['Массаж спины', 'Спортивный массаж', 'Классика'],
+      serviceIds: ['km-back-45', 'km-classic-60', 'km-anticell-60'],
+      workingDays: [0, 2, 4, 5, 6],
+      image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80',
+      imageAlt: 'Мастер Виталий Морозов',
+    },
+    {
+      id: 'km-margarita',
+      name: 'Маргарита Сорокина',
+      role: 'Специалист по моделирующим обёртываниям и эстетике тела (стаж 6 лет)',
+      experienceYears: '6 лет опыта',
+      approach: 'Владеет антицеллюлитными и дренажными методиками, создаёт идеальные условия для спа-релакса.',
+      quote: '«Забота о теле дарит женщине уверенность и внутреннее сияние».',
+      specialties: ['Антицеллюлитный массаж', 'СПА-обёртывания', 'Релакс'],
+      serviceIds: ['km-anticell-60', 'km-wrap-75', 'km-author-90'],
+      workingDays: [1, 3, 4, 5, 6],
+      image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=1000&q=80',
+      imageAlt: 'Специалист Маргарита Сорокина',
+    },
+  ],
+};
+
+// 15. «ÉLAN Wellness» (Флагманский премиум-концепт, Алматы, Олива & Лен)
 const ELAN_PRESET: BrandPreset = {
   id: 'elan',
   name: 'ÉLAN Wellness',
@@ -1847,9 +2504,9 @@ const ELAN_PRESET: BrandPreset = {
   specialists: studioConfig.specialists.items,
 };
 
-// Словарь пресетов и их псевдонимов для максимально удобного перехода по URL
+// Полный словарь пресетов и их псевдонимов
 export const BRAND_PRESETS: Record<string, BrandPreset> = {
-  // 1. Массаж СПА (ЖК Прокшино)
+  // 1. Массаж СПА (Прокшино)
   'massazh-spa': MASSAZH_SPA_PRESET,
   'massazh_spa': MASSAZH_SPA_PRESET,
   'spa': MASSAZH_SPA_PRESET,
@@ -1864,49 +2521,73 @@ export const BRAND_PRESETS: Record<string, BrandPreset> = {
   'just_relax': JUST_RELAX_PRESET,
   'justrelax': JUST_RELAX_PRESET,
 
-  // 4. Мари (Новинский бульвар / Смоленская)
+  // 4. Мари (Арбат / Смоленская)
   'mari': MARI_PRESET,
   'salon-mari': MARI_PRESET,
   'mari-spa': MARI_PRESET,
 
-  // 5. Изумрудный Будда (Нахимовский проспект)
+  // 5. Изумрудный Будда (Профсоюзная)
   'izumrudny-budda': IZUMRUDNY_BUDDA_PRESET,
   'izumrudny_budda': IZUMRUDNY_BUDDA_PRESET,
   'greenbudda': IZUMRUDNY_BUDDA_PRESET,
   'budda': IZUMRUDNY_BUDDA_PRESET,
 
-  // 6. Центр массажа и эпиляции (г. Московский)
+  // 6. Центр массажа и эпиляции (Московский)
   'moskovsky': MOSKOVSKY_PRESET,
   'tsentr_massazha_i_epilyatsii': MOSKOVSKY_PRESET,
   'tsentr-massazha': MOSKOVSKY_PRESET,
   'epil-moscow': MOSKOVSKY_PRESET,
   'lazer-moskovsky': MOSKOVSKY_PRESET,
 
-  // 7. Студия на Миля / Массаж Жулебино (Авиаконструктора Миля 14)
+  // 7. Студия на Миля (Жулебино)
   'zhulebino': ZHULEBINO_PRESET,
   'massazh-zhulebino': ZHULEBINO_PRESET,
   'milya-14': ZHULEBINO_PRESET,
   '1000205810': ZHULEBINO_PRESET,
 
-  // 8. Афродита SPA (Ленинский 158 / ГК Салют / Тропарёво)
+  // 8. Афродита SPA (Тропарёво / Салют)
   'afrodita': AFRODITA_PRESET,
   'spa-afrodita': AFRODITA_PRESET,
   'afrodita-salut': AFRODITA_PRESET,
   '1801653173': AFRODITA_PRESET,
 
-  // 9. Адель Beauty & Body (Маросейка 6-8с1 / Китай-город)
+  // 9. Адель Beauty & Body (Китай-город)
   'adel': ADEL_PRESET,
   'salon-adel': ADEL_PRESET,
   'adel-maroseyka': ADEL_PRESET,
   '1273390949': ADEL_PRESET,
 
-  // 10. Сакура Центр красоты (Севастопольский 15к1 / Крымская)
+  // 10. Сакура (Севастопольский / Крымская)
   'sakura': SAKURA_PRESET,
   'salon_krasoty': SAKURA_PRESET,
   'sakura-sevastopolsky': SAKURA_PRESET,
   '1372376382': SAKURA_PRESET,
 
-  // 11. ÉLAN Wellness (демо / флагман)
+  // 11. Dress Code (Барвихинская / Сетунь)
+  'dress-code': DRESS_CODE_PRESET,
+  'dress_code': DRESS_CODE_PRESET,
+  'dresscode': DRESS_CODE_PRESET,
+  '1148992182': DRESS_CODE_PRESET,
+
+  // 12. Touch Studio (Борисовские Пруды / Борисово)
+  'touch-studio': TOUCH_STUDIO_PRESET,
+  'touch_studio': TOUCH_STUDIO_PRESET,
+  'touchstudio': TOUCH_STUDIO_PRESET,
+  '1375392843': TOUCH_STUDIO_PRESET,
+
+  // 13. Лица (Гвардейская / Кунцевская)
+  'litsa': LITSA_PRESET,
+  'salon-litsa': LITSA_PRESET,
+  'litsa-kuntsevo': LITSA_PRESET,
+  '1692735323': LITSA_PRESET,
+
+  // 14. Камэрли (Ленинский 72/2 / Университет)
+  'kamerli': KAMERLI_PRESET,
+  'kamerly': KAMERLI_PRESET,
+  'kamerli-leninsky': KAMERLI_PRESET,
+  '188155284735': KAMERLI_PRESET,
+
+  // 15. ÉLAN Wellness (базовый флагман)
   'elan': ELAN_PRESET,
 };
 
@@ -1922,6 +2603,10 @@ export const BRAND_PRESETS_LIST: BrandPreset[] = [
   AFRODITA_PRESET,
   ADEL_PRESET,
   SAKURA_PRESET,
+  DRESS_CODE_PRESET,
+  TOUCH_STUDIO_PRESET,
+  LITSA_PRESET,
+  KAMERLI_PRESET,
   ELAN_PRESET,
 ];
 
